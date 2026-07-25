@@ -1,0 +1,95 @@
+/*
+ * Design tokens for the Agency Admin Console.
+ *
+ * Palette and type scale come from the ui-ux-pro-max design system
+ * ("internal admin console operations dashboard", density 8/10 — dense).
+ * Every screen in the console (Photographers, Convocation Events, Bookings,
+ * Scheduled Tasks) inherits from here; avoid page-local colours and spacing.
+ */
+
+:root {
+  /* Colour — blue data surface, amber reserved for the single primary action */
+  --color-primary: #1e40af;
+  --color-on-primary: #ffffff;
+  --color-secondary: #3b82f6;
+  --color-accent: #d97706;
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-foreground: #1e3a8a;
+  --color-muted: #e9eef6;
+  --color-muted-foreground: #475569;
+  --color-border: #dbeafe;
+  --color-destructive: #dc2626;
+  --color-ring: #1e40af;
+
+  /* Status — each pairs with an icon and a text label, never colour alone */
+  --color-pending: #b45309;
+  --color-pending-bg: #fef3c7;
+  --color-approved: #15803d;
+  --color-approved-bg: #dcfce7;
+  --color-rejected: #b91c1c;
+  --color-rejected-bg: #fee2e2;
+
+  /* Spacing — dense/dashboard scale (8→32px) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  --radius: 6px;
+  --radius-sm: 4px;
+
+  --font-sans: var(--font-fira-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-fira-code), ui-monospace, monospace;
+
+  --transition: 160ms ease;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1,
+h2 {
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* Keyboard focus must stay visible everywhere — never remove this outline. */
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

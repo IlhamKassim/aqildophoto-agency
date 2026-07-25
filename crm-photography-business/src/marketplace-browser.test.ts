@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MarketplaceBrowser } from "./marketplace-browser.js";
+import { openDatabase } from "./database.js";
 import { ConvocationEventRegistry } from "./convocation-event-registry.js";
 import { TimeSlotBoard } from "./time-slot-board.js";
 import { PackageCatalog } from "./package-catalog.js";
@@ -10,7 +11,7 @@ function approvalOf(approvedIds: string[]) {
 
 describe("MarketplaceBrowser", () => {
   it("browses upcoming Convocation Events", () => {
-    const convocationEvents = new ConvocationEventRegistry();
+    const convocationEvents = new ConvocationEventRegistry(openDatabase(":memory:"));
     const event = convocationEvents.createConvocationEvent({
       university: "Universiti Malaya",
       faculty: "Faculty of Engineering",
@@ -30,7 +31,7 @@ describe("MarketplaceBrowser", () => {
   });
 
   it("browses opted-in, approved Photographers for an event with their Packages and Add-ons", () => {
-    const convocationEvents = new ConvocationEventRegistry();
+    const convocationEvents = new ConvocationEventRegistry(openDatabase(":memory:"));
     const approval = approvalOf(["photographer-1"]);
     const timeSlotBoard = new TimeSlotBoard(approval);
     const packageCatalog = new PackageCatalog(approval);
@@ -58,7 +59,7 @@ describe("MarketplaceBrowser", () => {
   });
 
   it("excludes an opted-in Photographer who is not approved", () => {
-    const convocationEvents = new ConvocationEventRegistry();
+    const convocationEvents = new ConvocationEventRegistry(openDatabase(":memory:"));
     const approvedIds = ["photographer-1"];
     const approval = approvalOf(approvedIds);
     const timeSlotBoard = new TimeSlotBoard(approval);
@@ -76,7 +77,7 @@ describe("MarketplaceBrowser", () => {
   });
 
   it("browses open Time Slots for an event and Photographer", () => {
-    const convocationEvents = new ConvocationEventRegistry();
+    const convocationEvents = new ConvocationEventRegistry(openDatabase(":memory:"));
     const approval = approvalOf(["photographer-1"]);
     const timeSlotBoard = new TimeSlotBoard(approval);
     const packageCatalog = new PackageCatalog(approval);

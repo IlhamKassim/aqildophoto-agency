@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { ConvocationEventRegistry } from "./convocation-event-registry.js";
+import { openDatabase } from "./database.js";
+
+function setUp() {
+  return new ConvocationEventRegistry(openDatabase(":memory:"));
+}
 
 describe("ConvocationEventRegistry", () => {
   it("creates a Convocation Event with the given details", () => {
-    const registry = new ConvocationEventRegistry();
+    const registry = setUp();
 
     const event = registry.createConvocationEvent({
       university: "Universiti Malaya",
@@ -22,7 +27,7 @@ describe("ConvocationEventRegistry", () => {
   });
 
   it("lists events whose date has not yet passed", () => {
-    const registry = new ConvocationEventRegistry();
+    const registry = setUp();
     const upcoming = registry.createConvocationEvent({
       university: "Universiti Malaya",
       faculty: "Faculty of Engineering",
@@ -36,7 +41,7 @@ describe("ConvocationEventRegistry", () => {
   });
 
   it("excludes events whose date has already passed", () => {
-    const registry = new ConvocationEventRegistry();
+    const registry = setUp();
     registry.createConvocationEvent({
       university: "Universiti Malaya",
       faculty: "Faculty of Engineering",
@@ -50,7 +55,7 @@ describe("ConvocationEventRegistry", () => {
   });
 
   it("gets a Convocation Event's date by id", () => {
-    const registry = new ConvocationEventRegistry();
+    const registry = setUp();
     const event = registry.createConvocationEvent({
       university: "Universiti Malaya",
       faculty: "Faculty of Engineering",
@@ -59,5 +64,20 @@ describe("ConvocationEventRegistry", () => {
     });
 
     expect(registry.getConvocationEventDate(event.id)).toEqual(new Date("2026-10-14"));
+  });
+
+  it("survives re-instantiating against the same database connection", () => {
+    const db = openDatabase(":memory:");
+    const registry = new ConvocationEventRegistry(db);
+    const event = registry.createConvocationEvent({
+      university: "Universiti Malaya",
+      faculty: "Faculty of Engineering",
+      date: new Date("2026-10-14"),
+      venue: "Dewan Tunku Canselor",
+    });
+
+    const reloaded = new ConvocationEventRegistry(db);
+
+    expect(reloaded.listUpcomingConvocationEvents(new Date("2026-01-01"))).toEqual([event]);
   });
 });

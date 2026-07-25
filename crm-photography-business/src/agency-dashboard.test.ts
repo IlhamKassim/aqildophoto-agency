@@ -12,7 +12,7 @@ function approvalOf(approvedIds: string[]) {
 }
 
 function setUpBookingBoard() {
-  const convocationEvents = new ConvocationEventRegistry();
+  const convocationEvents = new ConvocationEventRegistry(openDatabase(":memory:"));
   const event = convocationEvents.createConvocationEvent({
     university: "Universiti Malaya",
     faculty: "Faculty of Engineering",

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BookingBoard } from "./booking-board.js";
+import { openDatabase } from "./database.js";
 import { TimeSlotBoard } from "./time-slot-board.js";
 import { ConvocationEventRegistry } from "./convocation-event-registry.js";
 import { PackageCatalog } from "./package-catalog.js";
@@ -9,7 +10,7 @@ function approvalOf(approvedIds: string[]) {
 }
 
 function setUpSlot(eventDate: Date = new Date("2026-10-14")) {
-  const convocationEvents = new ConvocationEventRegistry();
+  const convocationEvents = new ConvocationEventRegistry(openDatabase(":memory:"));
   const event = convocationEvents.createConvocationEvent({
     university: "Universiti Malaya",
     faculty: "Faculty of Engineering",

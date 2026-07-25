@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { TimeSlotBoard } from "./time-slot-board.js";
-import { openDatabase } from "./database.js";
+import { TimeSlotBoard } from "./time-slot-board";
+import { openDatabase } from "./database";
 
 function approvalOf(approvedIds: string[]) {
   return { isApproved: (photographerId: string) => approvedIds.includes(photographerId) };

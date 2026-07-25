@@ -1,5 +1,5 @@
-import type { Booking } from "./booking-board.js";
-import type { Photographer } from "./photographer-registry.js";
+import type { Booking } from "./booking-board";
+import type { Photographer } from "./photographer-registry";
 
 export interface AgencyDashboardDeps {
   bookings: { listAllBookings(): Booking[] };

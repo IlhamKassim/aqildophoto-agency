@@ -1,5 +1,5 @@
 import type Database from "better-sqlite3";
-import type { PhotographerApprovalCheck } from "./photographer-approval.js";
+import type { PhotographerApprovalCheck } from "./photographer-approval";
 
 export interface TimeSlotWindow {
   start: Date;

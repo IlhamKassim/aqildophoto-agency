@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { PackageCatalog } from "./package-catalog.js";
-import { openDatabase } from "./database.js";
+import { PackageCatalog } from "./package-catalog";
+import { openDatabase } from "./database";
 
 function approvalOf(approvedIds: string[]) {
   return { isApproved: (photographerId: string) => approvedIds.includes(photographerId) };

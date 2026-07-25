@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { AgencyDashboard } from "./agency-dashboard.js";
-import { BookingBoard } from "./booking-board.js";
-import { TimeSlotBoard } from "./time-slot-board.js";
-import { ConvocationEventRegistry } from "./convocation-event-registry.js";
-import { PackageCatalog } from "./package-catalog.js";
-import { PhotographerRegistry } from "./photographer-registry.js";
-import { openDatabase } from "./database.js";
+import { AgencyDashboard } from "./agency-dashboard";
+import { BookingBoard } from "./booking-board";
+import { TimeSlotBoard } from "./time-slot-board";
+import { ConvocationEventRegistry } from "./convocation-event-registry";
+import { PackageCatalog } from "./package-catalog";
+import { PhotographerRegistry } from "./photographer-registry";
+import { openDatabase } from "./database";
 
 function approvalOf(approvedIds: string[]) {
   return { isApproved: (photographerId: string) => approvedIds.includes(photographerId) };

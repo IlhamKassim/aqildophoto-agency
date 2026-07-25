@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { MarketplaceBrowser } from "./marketplace-browser.js";
-import { openDatabase } from "./database.js";
-import { ConvocationEventRegistry } from "./convocation-event-registry.js";
-import { TimeSlotBoard } from "./time-slot-board.js";
-import { PackageCatalog } from "./package-catalog.js";
+import { MarketplaceBrowser } from "./marketplace-browser";
+import { openDatabase } from "./database";
+import { ConvocationEventRegistry } from "./convocation-event-registry";
+import { TimeSlotBoard } from "./time-slot-board";
+import { PackageCatalog } from "./package-catalog";
 
 function approvalOf(approvedIds: string[]) {
   return { isApproved: (photographerId: string) => approvedIds.includes(photographerId) };

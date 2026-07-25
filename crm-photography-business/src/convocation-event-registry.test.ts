@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ConvocationEventRegistry } from "./convocation-event-registry.js";
-import { openDatabase } from "./database.js";
+import { ConvocationEventRegistry } from "./convocation-event-registry";
+import { openDatabase } from "./database";
 
 function setUp() {
   return new ConvocationEventRegistry(openDatabase(":memory:"));

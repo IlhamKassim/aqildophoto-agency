@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { PhotographerRegistry } from "./photographer-registry.js";
-import { openDatabase } from "./database.js";
+import { PhotographerRegistry } from "./photographer-registry";
+import { openDatabase } from "./database";
 
 function setUp() {
   return new PhotographerRegistry(openDatabase(":memory:"));

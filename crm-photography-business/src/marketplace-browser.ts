@@ -1,7 +1,7 @@
-import type { ConvocationEvent } from "./convocation-event-registry.js";
-import type { PhotographerApprovalCheck } from "./photographer-approval.js";
-import type { PackageWithAddOns } from "./package-catalog.js";
-import type { TimeSlot } from "./time-slot-board.js";
+import type { ConvocationEvent } from "./convocation-event-registry";
+import type { PhotographerApprovalCheck } from "./photographer-approval";
+import type { PackageWithAddOns } from "./package-catalog";
+import type { TimeSlot } from "./time-slot-board";
 
 export interface MarketplaceBrowserDeps {
   convocationEvents: { listUpcomingConvocationEvents(now?: Date): ConvocationEvent[] };

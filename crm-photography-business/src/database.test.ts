@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { openDatabase, initializeSchema } from "./database.js";
+import { openDatabase, initializeSchema } from "./database";
 
 const EXPECTED_TABLES = [
   "photographers",

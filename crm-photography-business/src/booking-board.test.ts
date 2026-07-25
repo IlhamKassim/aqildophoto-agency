@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { BookingBoard } from "./booking-board.js";
-import { openDatabase } from "./database.js";
-import { TimeSlotBoard } from "./time-slot-board.js";
-import { ConvocationEventRegistry } from "./convocation-event-registry.js";
-import { PackageCatalog } from "./package-catalog.js";
+import { BookingBoard } from "./booking-board";
+import { openDatabase } from "./database";
+import { TimeSlotBoard } from "./time-slot-board";
+import { ConvocationEventRegistry } from "./convocation-event-registry";
+import { PackageCatalog } from "./package-catalog";
 
 function approvalOf(approvedIds: string[]) {
   return { isApproved: (photographerId: string) => approvedIds.includes(photographerId) };

@@ -13,10 +13,12 @@ export interface Booking {
   timeSlotId: string;
   packageId: string;
   addOnIds: string[];
+  convocationEventId: string;
   status: BookingStatus;
   requestedAt: Date;
   expiresAt: Date;
   commitmentPayment?: CommissionSplit;
+  payoutReleasedAt?: Date;
 }
 
 export interface TimeSlotLock {
@@ -24,8 +26,13 @@ export interface TimeSlotLock {
   reopenTimeSlot(timeSlotId: string): void;
 }
 
+export interface ConvocationEventDateLookup {
+  getConvocationEventDate(convocationEventId: string): Date;
+}
+
 export interface BookingBoardDeps {
   timeSlots: TimeSlotLock;
+  convocationEvents: ConvocationEventDateLookup;
 }
 
 const DEFAULT_RESPONSE_DEADLINE_MS = 48 * 60 * 60 * 1000;
@@ -46,6 +53,7 @@ export class BookingBoard {
     timeSlotId: string,
     packageId: string,
     addOnIds: string[],
+    convocationEventId: string,
   ): Booking {
     this.deps.timeSlots.lockTimeSlot(timeSlotId);
     const requestedAt = new Date();
@@ -55,6 +63,7 @@ export class BookingBoard {
       timeSlotId,
       packageId,
       addOnIds,
+      convocationEventId,
       status: "requested",
       requestedAt,
       expiresAt: new Date(requestedAt.getTime() + this.responseDeadlineMs),
@@ -101,13 +110,39 @@ export class BookingBoard {
     return booking;
   }
 
+  getBooking(bookingId: string): Booking {
+    return this.getOrThrow(bookingId);
+  }
+
+  releaseEligiblePayouts(now: Date): Booking[] {
+    const released: Booking[] = [];
+    for (const booking of this.bookings.values()) {
+      if (booking.status !== "committed" || booking.payoutReleasedAt) {
+        continue;
+      }
+      const eventDate = this.deps.convocationEvents.getConvocationEventDate(
+        booking.convocationEventId,
+      );
+      if (eventDate <= now) {
+        booking.payoutReleasedAt = now;
+        released.push(booking);
+      }
+    }
+    return released;
+  }
+
   private getInStatusOrThrow(bookingId: string, expectedStatus: BookingStatus): Booking {
+    const booking = this.getOrThrow(bookingId);
+    if (booking.status !== expectedStatus) {
+      throw new Error(`Booking ${bookingId} is ${booking.status}, not ${expectedStatus}`);
+    }
+    return booking;
+  }
+
+  private getOrThrow(bookingId: string): Booking {
     const booking = this.bookings.get(bookingId);
     if (!booking) {
       throw new Error(`No Booking found with id ${bookingId}`);
-    }
-    if (booking.status !== expectedStatus) {
-      throw new Error(`Booking ${bookingId} is ${booking.status}, not ${expectedStatus}`);
     }
     return booking;
   }

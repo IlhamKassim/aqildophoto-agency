@@ -24,4 +24,12 @@ export class ConvocationEventRegistry {
   listUpcomingConvocationEvents(now: Date = new Date()): ConvocationEvent[] {
     return this.events.filter((event) => event.date >= now);
   }
+
+  getConvocationEventDate(convocationEventId: string): Date {
+    const event = this.events.find((candidate) => candidate.id === convocationEventId);
+    if (!event) {
+      throw new Error(`No Convocation Event found with id ${convocationEventId}`);
+    }
+    return event.date;
+  }
 }

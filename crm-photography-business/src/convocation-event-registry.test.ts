@@ -48,4 +48,16 @@ describe("ConvocationEventRegistry", () => {
 
     expect(events).toHaveLength(0);
   });
+
+  it("gets a Convocation Event's date by id", () => {
+    const registry = new ConvocationEventRegistry();
+    const event = registry.createConvocationEvent({
+      university: "Universiti Malaya",
+      faculty: "Faculty of Engineering",
+      date: new Date("2026-10-14"),
+      venue: "Dewan Tunku Canselor",
+    });
+
+    expect(registry.getConvocationEventDate(event.id)).toEqual(new Date("2026-10-14"));
+  });
 });

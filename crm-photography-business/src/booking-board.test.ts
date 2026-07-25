@@ -1,44 +1,52 @@
 import { describe, expect, it } from "vitest";
 import { BookingBoard } from "./booking-board.js";
 import { TimeSlotBoard } from "./time-slot-board.js";
+import { ConvocationEventRegistry } from "./convocation-event-registry.js";
 
 function approvalOf(approvedIds: string[]) {
   return { isApproved: (photographerId: string) => approvedIds.includes(photographerId) };
 }
 
-function setUpSlot() {
+function setUpSlot(eventDate: Date = new Date("2026-10-14")) {
+  const convocationEvents = new ConvocationEventRegistry();
+  const event = convocationEvents.createConvocationEvent({
+    university: "Universiti Malaya",
+    faculty: "Faculty of Engineering",
+    date: eventDate,
+    venue: "Dewan Tunku Canselor",
+  });
   const timeSlotBoard = new TimeSlotBoard(approvalOf(["photographer-1"]));
-  timeSlotBoard.optIn("photographer-1", "event-1");
-  const slot = timeSlotBoard.defineTimeSlot("photographer-1", "event-1", {
+  timeSlotBoard.optIn("photographer-1", event.id);
+  const slot = timeSlotBoard.defineTimeSlot("photographer-1", event.id, {
     start: new Date("2026-10-14T09:00:00"),
     end: new Date("2026-10-14T09:30:00"),
   });
-  return { timeSlotBoard, slot };
+  return { convocationEvents, timeSlotBoard, slot, eventId: event.id };
 }
 
 describe("BookingBoard", () => {
   it("requesting a Booking locks the Time Slot", () => {
-    const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard });
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
 
-    const request = board.requestBooking("student-1", slot.id, "package-1", []);
+    const request = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
 
     expect(request.status).toBe("requested");
-    expect(timeSlotBoard.listOpenTimeSlots("event-1", "photographer-1")).toEqual([]);
+    expect(timeSlotBoard.listOpenTimeSlots(eventId, "photographer-1")).toEqual([]);
   });
 
   it("refuses a second Booking Request against an already-held Time Slot", () => {
-    const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard });
-    board.requestBooking("student-1", slot.id, "package-1", []);
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    board.requestBooking("student-1", slot.id, "package-1", [], eventId);
 
-    expect(() => board.requestBooking("student-2", slot.id, "package-1", [])).toThrow();
+    expect(() => board.requestBooking("student-2", slot.id, "package-1", [], eventId)).toThrow();
   });
 
   it("accepting a Booking Request transitions it to accepted", () => {
-    const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard });
-    const request = board.requestBooking("student-1", slot.id, "package-1", []);
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    const request = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
 
     const accepted = board.acceptBookingRequest(request.id);
 
@@ -46,46 +54,46 @@ describe("BookingBoard", () => {
   });
 
   it("rejecting a Booking Request transitions it to rejected and reopens the Time Slot", () => {
-    const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard });
-    const request = board.requestBooking("student-1", slot.id, "package-1", []);
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    const request = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
 
     const rejected = board.rejectBookingRequest(request.id);
 
     expect(rejected.status).toBe("rejected");
-    expect(timeSlotBoard.listOpenTimeSlots("event-1", "photographer-1")).toEqual([
+    expect(timeSlotBoard.listOpenTimeSlots(eventId, "photographer-1")).toEqual([
       { ...slot, status: "open" },
     ]);
   });
 
   it("expires a Booking Request past its response deadline and reopens the Time Slot", () => {
-    const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard }, 1000);
-    const request = board.requestBooking("student-1", slot.id, "package-1", []);
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents }, 1000);
+    const request = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
 
     const expired = board.expireStaleBookingRequests(new Date(request.expiresAt.getTime() + 1));
 
     expect(expired).toEqual([{ ...request, status: "expired" }]);
-    expect(timeSlotBoard.listOpenTimeSlots("event-1", "photographer-1")).toEqual([
+    expect(timeSlotBoard.listOpenTimeSlots(eventId, "photographer-1")).toEqual([
       { ...slot, status: "open" },
     ]);
   });
 
   it("leaves a Booking Request within its response deadline untouched", () => {
-    const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard }, 1000);
-    const request = board.requestBooking("student-1", slot.id, "package-1", []);
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents }, 1000);
+    const request = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
 
     const expired = board.expireStaleBookingRequests(new Date(request.expiresAt.getTime() - 1));
 
     expect(expired).toEqual([]);
-    expect(timeSlotBoard.listOpenTimeSlots("event-1", "photographer-1")).toEqual([]);
+    expect(timeSlotBoard.listOpenTimeSlots(eventId, "photographer-1")).toEqual([]);
   });
 
   it("paying the Commitment Payment on an accepted Booking transitions it to committed", () => {
-    const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard });
-    const booking = board.requestBooking("student-1", slot.id, "package-1", []);
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
     board.acceptBookingRequest(booking.id);
 
     const committed = board.payCommitmentPayment(booking.id);
@@ -94,9 +102,9 @@ describe("BookingBoard", () => {
   });
 
   it("splits the RM30 Commitment Payment at the default 15% Commission rate", () => {
-    const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard });
-    const booking = board.requestBooking("student-1", slot.id, "package-1", []);
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
     board.acceptBookingRequest(booking.id);
 
     const committed = board.payCommitmentPayment(booking.id);
@@ -109,9 +117,9 @@ describe("BookingBoard", () => {
   });
 
   it("honors a custom Commission rate", () => {
-    const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard }, undefined, 0.2);
-    const booking = board.requestBooking("student-1", slot.id, "package-1", []);
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents }, undefined, 0.2);
+    const booking = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
     board.acceptBookingRequest(booking.id);
 
     const committed = board.payCommitmentPayment(booking.id);
@@ -124,9 +132,9 @@ describe("BookingBoard", () => {
   });
 
   it("refuses to pay the Commitment Payment on a Booking that is not accepted", () => {
-    const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard });
-    const booking = board.requestBooking("student-1", slot.id, "package-1", []);
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
 
     expect(() => board.payCommitmentPayment(booking.id)).toThrow();
 
@@ -134,5 +142,50 @@ describe("BookingBoard", () => {
     board.payCommitmentPayment(booking.id);
 
     expect(() => board.payCommitmentPayment(booking.id)).toThrow();
+  });
+
+  it("leaves a freshly committed Booking's payout unreleased", () => {
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
+    board.acceptBookingRequest(booking.id);
+    board.payCommitmentPayment(booking.id);
+
+    expect(board.getBooking(booking.id).payoutReleasedAt).toBeUndefined();
+  });
+
+  it("releases a committed Booking's payout once its Convocation Event date has passed", () => {
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot(new Date("2026-10-14"));
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
+    board.acceptBookingRequest(booking.id);
+    board.payCommitmentPayment(booking.id);
+
+    const released = board.releaseEligiblePayouts(new Date("2026-10-15"));
+
+    expect(released.map((b) => b.id)).toEqual([booking.id]);
+    expect(board.getBooking(booking.id).payoutReleasedAt).toEqual(new Date("2026-10-15"));
+  });
+
+  it("does not release a committed Booking's payout before its Convocation Event date", () => {
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot(new Date("2026-10-14"));
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
+    board.acceptBookingRequest(booking.id);
+    board.payCommitmentPayment(booking.id);
+
+    const released = board.releaseEligiblePayouts(new Date("2026-10-13"));
+
+    expect(released).toEqual([]);
+    expect(board.getBooking(booking.id).payoutReleasedAt).toBeUndefined();
+  });
+
+  it("does not touch or error on a Booking that is not committed", () => {
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot(new Date("2026-10-14"));
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    board.requestBooking("student-1", slot.id, "package-1", [], eventId);
+
+    expect(() => board.releaseEligiblePayouts(new Date("2026-10-15"))).not.toThrow();
+    expect(board.releaseEligiblePayouts(new Date("2026-10-15"))).toEqual([]);
   });
 });

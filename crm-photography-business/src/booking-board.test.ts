@@ -23,7 +23,7 @@ function setUpSlot(eventDate: Date = new Date("2026-10-14")) {
     start: new Date("2026-10-14T09:00:00"),
     end: new Date("2026-10-14T09:30:00"),
   });
-  const packages = new PackageCatalog(approvalOf(["photographer-1"]));
+  const packages = new PackageCatalog(approvalOf(["photographer-1"]), openDatabase(":memory:"));
   const pkg = packages.createPackage("photographer-1", {
     name: "Basic",
     price: 300,

@@ -21,7 +21,7 @@ describe("MarketplaceBrowser", () => {
     const browser = new MarketplaceBrowser({
       convocationEvents,
       timeSlotBoard: new TimeSlotBoard(approvalOf([])),
-      packageCatalog: new PackageCatalog(approvalOf([])),
+      packageCatalog: new PackageCatalog(approvalOf([]), openDatabase(":memory:")),
       photographerApproval: approvalOf([]),
     });
 
@@ -34,7 +34,7 @@ describe("MarketplaceBrowser", () => {
     const convocationEvents = new ConvocationEventRegistry(openDatabase(":memory:"));
     const approval = approvalOf(["photographer-1"]);
     const timeSlotBoard = new TimeSlotBoard(approval);
-    const packageCatalog = new PackageCatalog(approval);
+    const packageCatalog = new PackageCatalog(approval, openDatabase(":memory:"));
     timeSlotBoard.optIn("photographer-1", "event-1");
     const pkg = packageCatalog.createPackage("photographer-1", {
       name: "Basic",
@@ -63,7 +63,7 @@ describe("MarketplaceBrowser", () => {
     const approvedIds = ["photographer-1"];
     const approval = approvalOf(approvedIds);
     const timeSlotBoard = new TimeSlotBoard(approval);
-    const packageCatalog = new PackageCatalog(approval);
+    const packageCatalog = new PackageCatalog(approval, openDatabase(":memory:"));
     timeSlotBoard.optIn("photographer-1", "event-1");
     approvedIds.length = 0; // simulate approval being revoked after opt-in
     const browser = new MarketplaceBrowser({
@@ -80,7 +80,7 @@ describe("MarketplaceBrowser", () => {
     const convocationEvents = new ConvocationEventRegistry(openDatabase(":memory:"));
     const approval = approvalOf(["photographer-1"]);
     const timeSlotBoard = new TimeSlotBoard(approval);
-    const packageCatalog = new PackageCatalog(approval);
+    const packageCatalog = new PackageCatalog(approval, openDatabase(":memory:"));
     timeSlotBoard.optIn("photographer-1", "event-1");
     const slot = timeSlotBoard.defineTimeSlot("photographer-1", "event-1", {
       start: new Date("2026-10-14T09:00:00"),

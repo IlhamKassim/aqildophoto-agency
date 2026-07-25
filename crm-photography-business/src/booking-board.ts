@@ -1,4 +1,11 @@
-export type BookingStatus = "requested" | "accepted" | "rejected" | "expired";
+export type BookingStatus = "requested" | "accepted" | "rejected" | "expired" | "committed";
+
+export interface CommissionSplit {
+  amount: number;
+  agencyShare: number;
+  photographerShare: number;
+  paidAt: Date;
+}
 
 export interface Booking {
   id: string;
@@ -9,6 +16,7 @@ export interface Booking {
   status: BookingStatus;
   requestedAt: Date;
   expiresAt: Date;
+  commitmentPayment?: CommissionSplit;
 }
 
 export interface TimeSlotLock {
@@ -21,6 +29,8 @@ export interface BookingBoardDeps {
 }
 
 const DEFAULT_RESPONSE_DEADLINE_MS = 48 * 60 * 60 * 1000;
+const DEFAULT_COMMISSION_RATE = 0.15;
+const COMMITMENT_PAYMENT_AMOUNT = 30;
 
 export class BookingBoard {
   private readonly bookings = new Map<string, Booking>();
@@ -28,6 +38,7 @@ export class BookingBoard {
   constructor(
     private readonly deps: BookingBoardDeps,
     private readonly responseDeadlineMs: number = DEFAULT_RESPONSE_DEADLINE_MS,
+    private readonly commissionRate: number = DEFAULT_COMMISSION_RATE,
   ) {}
 
   requestBooking(
@@ -53,13 +64,13 @@ export class BookingBoard {
   }
 
   acceptBookingRequest(bookingId: string): Booking {
-    const booking = this.getRequestedOrThrow(bookingId);
+    const booking = this.getInStatusOrThrow(bookingId, "requested");
     booking.status = "accepted";
     return booking;
   }
 
   rejectBookingRequest(bookingId: string): Booking {
-    const booking = this.getRequestedOrThrow(bookingId);
+    const booking = this.getInStatusOrThrow(bookingId, "requested");
     booking.status = "rejected";
     this.deps.timeSlots.reopenTimeSlot(booking.timeSlotId);
     return booking;
@@ -77,13 +88,26 @@ export class BookingBoard {
     return expired;
   }
 
-  private getRequestedOrThrow(bookingId: string): Booking {
+  payCommitmentPayment(bookingId: string): Booking {
+    const booking = this.getInStatusOrThrow(bookingId, "accepted");
+    const agencyShare = COMMITMENT_PAYMENT_AMOUNT * this.commissionRate;
+    booking.commitmentPayment = {
+      amount: COMMITMENT_PAYMENT_AMOUNT,
+      agencyShare,
+      photographerShare: COMMITMENT_PAYMENT_AMOUNT - agencyShare,
+      paidAt: new Date(),
+    };
+    booking.status = "committed";
+    return booking;
+  }
+
+  private getInStatusOrThrow(bookingId: string, expectedStatus: BookingStatus): Booking {
     const booking = this.bookings.get(bookingId);
     if (!booking) {
       throw new Error(`No Booking found with id ${bookingId}`);
     }
-    if (booking.status !== "requested") {
-      throw new Error(`Booking ${bookingId} is ${booking.status}, not requested`);
+    if (booking.status !== expectedStatus) {
+      throw new Error(`Booking ${bookingId} is ${booking.status}, not ${expectedStatus}`);
     }
     return booking;
   }

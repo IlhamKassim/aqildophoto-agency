@@ -81,4 +81,58 @@ describe("BookingBoard", () => {
     expect(expired).toEqual([]);
     expect(timeSlotBoard.listOpenTimeSlots("event-1", "photographer-1")).toEqual([]);
   });
+
+  it("paying the Commitment Payment on an accepted Booking transitions it to committed", () => {
+    const { timeSlotBoard, slot } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", []);
+    board.acceptBookingRequest(booking.id);
+
+    const committed = board.payCommitmentPayment(booking.id);
+
+    expect(committed.status).toBe("committed");
+  });
+
+  it("splits the RM30 Commitment Payment at the default 15% Commission rate", () => {
+    const { timeSlotBoard, slot } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", []);
+    board.acceptBookingRequest(booking.id);
+
+    const committed = board.payCommitmentPayment(booking.id);
+
+    expect(committed.commitmentPayment).toMatchObject({
+      amount: 30,
+      agencyShare: 4.5,
+      photographerShare: 25.5,
+    });
+  });
+
+  it("honors a custom Commission rate", () => {
+    const { timeSlotBoard, slot } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard }, undefined, 0.2);
+    const booking = board.requestBooking("student-1", slot.id, "package-1", []);
+    board.acceptBookingRequest(booking.id);
+
+    const committed = board.payCommitmentPayment(booking.id);
+
+    expect(committed.commitmentPayment).toMatchObject({
+      amount: 30,
+      agencyShare: 6,
+      photographerShare: 24,
+    });
+  });
+
+  it("refuses to pay the Commitment Payment on a Booking that is not accepted", () => {
+    const { timeSlotBoard, slot } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", []);
+
+    expect(() => board.payCommitmentPayment(booking.id)).toThrow();
+
+    board.acceptBookingRequest(booking.id);
+    board.payCommitmentPayment(booking.id);
+
+    expect(() => board.payCommitmentPayment(booking.id)).toThrow();
+  });
 });

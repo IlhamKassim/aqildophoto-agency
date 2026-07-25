@@ -59,4 +59,23 @@ describe("PackageCatalog", () => {
       catalog.addAddOn("unknown-package-id", { name: "Extra hour", price: 100 }),
     ).toThrow();
   });
+
+  it("lists a Photographer's Packages together with their Add-ons", () => {
+    const catalog = new PackageCatalog(approvalOf(["photographer-1"]));
+    const pkg = catalog.createPackage("photographer-1", {
+      name: "Basic",
+      price: 300,
+      description: "2hrs, 30 edited photos",
+    });
+    catalog.addAddOn(pkg.id, { name: "Extra hour", price: 100 });
+
+    const packages = catalog.listPackagesWithAddOns("photographer-1");
+
+    expect(packages).toEqual([
+      {
+        ...pkg,
+        addOns: [expect.objectContaining({ name: "Extra hour", price: 100 })],
+      },
+    ]);
+  });
 });

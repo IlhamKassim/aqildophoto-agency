@@ -13,7 +13,8 @@ export interface TimeSlot extends TimeSlotWindow {
 }
 
 export class TimeSlotBoard {
-  private readonly optIns = new Set<string>();
+  private readonly optedInPhotographerIdsByEvent = new Map<string, Set<string>>();
+  private readonly timeSlots: TimeSlot[] = [];
 
   constructor(private readonly photographerApproval: PhotographerApprovalCheck) {}
 
@@ -21,7 +22,9 @@ export class TimeSlotBoard {
     if (!this.photographerApproval.isApproved(photographerId)) {
       throw new Error(`Photographer ${photographerId} is not approved`);
     }
-    this.optIns.add(this.optInKey(photographerId, convocationEventId));
+    const optedIn = this.optedInPhotographerIdsByEvent.get(convocationEventId) ?? new Set();
+    optedIn.add(photographerId);
+    this.optedInPhotographerIdsByEvent.set(convocationEventId, optedIn);
   }
 
   defineTimeSlot(
@@ -29,21 +32,36 @@ export class TimeSlotBoard {
     convocationEventId: string,
     window: TimeSlotWindow,
   ): TimeSlot {
-    if (!this.optIns.has(this.optInKey(photographerId, convocationEventId))) {
+    if (!this.hasOptedIn(photographerId, convocationEventId)) {
       throw new Error(
         `Photographer ${photographerId} has not opted in to Convocation Event ${convocationEventId}`,
       );
     }
-    return {
+    const slot: TimeSlot = {
       id: crypto.randomUUID(),
       photographerId,
       convocationEventId,
       status: "open",
       ...window,
     };
+    this.timeSlots.push(slot);
+    return slot;
   }
 
-  private optInKey(photographerId: string, convocationEventId: string): string {
-    return `${photographerId}::${convocationEventId}`;
+  listOptedInPhotographerIds(convocationEventId: string): string[] {
+    return [...(this.optedInPhotographerIdsByEvent.get(convocationEventId) ?? [])];
+  }
+
+  listOpenTimeSlots(convocationEventId: string, photographerId: string): TimeSlot[] {
+    return this.timeSlots.filter(
+      (slot) =>
+        slot.convocationEventId === convocationEventId &&
+        slot.photographerId === photographerId &&
+        slot.status === "open",
+    );
+  }
+
+  private hasOptedIn(photographerId: string, convocationEventId: string): boolean {
+    return this.optedInPhotographerIdsByEvent.get(convocationEventId)?.has(photographerId) ?? false;
   }
 }

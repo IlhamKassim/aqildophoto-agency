@@ -44,4 +44,23 @@ describe("TimeSlotBoard", () => {
       }),
     ).toThrow();
   });
+
+  it("lists the Photographer ids opted in to a Convocation Event", () => {
+    const board = new TimeSlotBoard(approvalOf(["photographer-1", "photographer-2"]));
+    board.optIn("photographer-1", "event-1");
+    board.optIn("photographer-2", "event-2");
+
+    expect(board.listOptedInPhotographerIds("event-1")).toEqual(["photographer-1"]);
+  });
+
+  it("lists open Time Slots for a Convocation Event and Photographer", () => {
+    const board = new TimeSlotBoard(approvalOf(["photographer-1"]));
+    board.optIn("photographer-1", "event-1");
+    const slot = board.defineTimeSlot("photographer-1", "event-1", {
+      start: new Date("2026-10-14T09:00:00"),
+      end: new Date("2026-10-14T09:30:00"),
+    });
+
+    expect(board.listOpenTimeSlots("event-1", "photographer-1")).toEqual([slot]);
+  });
 });

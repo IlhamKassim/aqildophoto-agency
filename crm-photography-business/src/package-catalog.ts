@@ -21,8 +21,13 @@ export interface AddOn extends AddOnDetails {
   packageId: string;
 }
 
+export interface PackageWithAddOns extends Package {
+  addOns: AddOn[];
+}
+
 export class PackageCatalog {
   private readonly packages = new Map<string, Package>();
+  private readonly addOnsByPackageId = new Map<string, AddOn[]>();
 
   constructor(private readonly photographerApproval: PhotographerApprovalCheck) {}
 
@@ -36,6 +41,7 @@ export class PackageCatalog {
       ...details,
     };
     this.packages.set(pkg.id, pkg);
+    this.addOnsByPackageId.set(pkg.id, []);
     return pkg;
   }
 
@@ -43,10 +49,18 @@ export class PackageCatalog {
     if (!this.packages.has(packageId)) {
       throw new Error(`No Package found with id ${packageId}`);
     }
-    return {
+    const addOn: AddOn = {
       id: crypto.randomUUID(),
       packageId,
       ...details,
     };
+    this.addOnsByPackageId.get(packageId)!.push(addOn);
+    return addOn;
+  }
+
+  listPackagesWithAddOns(photographerId: string): PackageWithAddOns[] {
+    return [...this.packages.values()]
+      .filter((pkg) => pkg.photographerId === photographerId)
+      .map((pkg) => ({ ...pkg, addOns: this.addOnsByPackageId.get(pkg.id) ?? [] }));
   }
 }

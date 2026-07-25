@@ -19,7 +19,7 @@ function setUpBookingBoard() {
     date: new Date("2026-10-14"),
     venue: "Dewan Tunku Canselor",
   });
-  const timeSlotBoard = new TimeSlotBoard(approvalOf(["photographer-1"]));
+  const timeSlotBoard = new TimeSlotBoard(approvalOf(["photographer-1"]), openDatabase(":memory:"));
   timeSlotBoard.optIn("photographer-1", event.id);
   const slot = timeSlotBoard.defineTimeSlot("photographer-1", event.id, {
     start: new Date("2026-10-14T09:00:00"),

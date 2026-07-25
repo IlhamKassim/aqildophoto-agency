@@ -20,7 +20,7 @@ describe("MarketplaceBrowser", () => {
     });
     const browser = new MarketplaceBrowser({
       convocationEvents,
-      timeSlotBoard: new TimeSlotBoard(approvalOf([])),
+      timeSlotBoard: new TimeSlotBoard(approvalOf([]), openDatabase(":memory:")),
       packageCatalog: new PackageCatalog(approvalOf([]), openDatabase(":memory:")),
       photographerApproval: approvalOf([]),
     });
@@ -33,7 +33,7 @@ describe("MarketplaceBrowser", () => {
   it("browses opted-in, approved Photographers for an event with their Packages and Add-ons", () => {
     const convocationEvents = new ConvocationEventRegistry(openDatabase(":memory:"));
     const approval = approvalOf(["photographer-1"]);
-    const timeSlotBoard = new TimeSlotBoard(approval);
+    const timeSlotBoard = new TimeSlotBoard(approval, openDatabase(":memory:"));
     const packageCatalog = new PackageCatalog(approval, openDatabase(":memory:"));
     timeSlotBoard.optIn("photographer-1", "event-1");
     const pkg = packageCatalog.createPackage("photographer-1", {
@@ -62,7 +62,7 @@ describe("MarketplaceBrowser", () => {
     const convocationEvents = new ConvocationEventRegistry(openDatabase(":memory:"));
     const approvedIds = ["photographer-1"];
     const approval = approvalOf(approvedIds);
-    const timeSlotBoard = new TimeSlotBoard(approval);
+    const timeSlotBoard = new TimeSlotBoard(approval, openDatabase(":memory:"));
     const packageCatalog = new PackageCatalog(approval, openDatabase(":memory:"));
     timeSlotBoard.optIn("photographer-1", "event-1");
     approvedIds.length = 0; // simulate approval being revoked after opt-in
@@ -79,7 +79,7 @@ describe("MarketplaceBrowser", () => {
   it("browses open Time Slots for an event and Photographer", () => {
     const convocationEvents = new ConvocationEventRegistry(openDatabase(":memory:"));
     const approval = approvalOf(["photographer-1"]);
-    const timeSlotBoard = new TimeSlotBoard(approval);
+    const timeSlotBoard = new TimeSlotBoard(approval, openDatabase(":memory:"));
     const packageCatalog = new PackageCatalog(approval, openDatabase(":memory:"));
     timeSlotBoard.optIn("photographer-1", "event-1");
     const slot = timeSlotBoard.defineTimeSlot("photographer-1", "event-1", {

@@ -188,4 +188,56 @@ describe("BookingBoard", () => {
     expect(() => board.releaseEligiblePayouts(new Date("2026-10-15"))).not.toThrow();
     expect(board.releaseEligiblePayouts(new Date("2026-10-15"))).toEqual([]);
   });
+
+  it("cancelling by Student forfeits the Commitment Payment", () => {
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
+    board.acceptBookingRequest(booking.id);
+    board.payCommitmentPayment(booking.id);
+
+    const cancelled = board.cancelByStudent(booking.id);
+
+    expect(cancelled).toMatchObject({
+      status: "cancelled",
+      cancelledBy: "student",
+      refunded: false,
+    });
+  });
+
+  it("cancelling by Photographer before payout release refunds the Student in full", () => {
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
+    board.acceptBookingRequest(booking.id);
+    board.payCommitmentPayment(booking.id);
+
+    const cancelled = board.cancelByPhotographer(booking.id);
+
+    expect(cancelled).toMatchObject({
+      status: "cancelled",
+      cancelledBy: "photographer",
+      refunded: true,
+    });
+  });
+
+  it("refuses a Photographer cancellation once the payout has already released", () => {
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot(new Date("2026-10-14"));
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
+    board.acceptBookingRequest(booking.id);
+    board.payCommitmentPayment(booking.id);
+    board.releaseEligiblePayouts(new Date("2026-10-15"));
+
+    expect(() => board.cancelByPhotographer(booking.id)).toThrow();
+  });
+
+  it("refuses to cancel a Booking that is not committed", () => {
+    const { convocationEvents, timeSlotBoard, slot, eventId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents });
+    const booking = board.requestBooking("student-1", slot.id, "package-1", [], eventId);
+
+    expect(() => board.cancelByStudent(booking.id)).toThrow();
+    expect(() => board.cancelByPhotographer(booking.id)).toThrow();
+  });
 });

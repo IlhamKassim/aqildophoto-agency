@@ -1,4 +1,10 @@
-export type BookingStatus = "requested" | "accepted" | "rejected" | "expired" | "committed";
+export type BookingStatus =
+  | "requested"
+  | "accepted"
+  | "rejected"
+  | "expired"
+  | "committed"
+  | "cancelled";
 
 export interface CommissionSplit {
   amount: number;
@@ -19,6 +25,9 @@ export interface Booking {
   expiresAt: Date;
   commitmentPayment?: CommissionSplit;
   payoutReleasedAt?: Date;
+  cancelledBy?: "student" | "photographer";
+  cancelledAt?: Date;
+  refunded?: boolean;
 }
 
 export interface TimeSlotLock {
@@ -112,6 +121,29 @@ export class BookingBoard {
 
   getBooking(bookingId: string): Booking {
     return this.getOrThrow(bookingId);
+  }
+
+  cancelByStudent(bookingId: string): Booking {
+    const booking = this.getInStatusOrThrow(bookingId, "committed");
+    booking.status = "cancelled";
+    booking.cancelledBy = "student";
+    booking.cancelledAt = new Date();
+    booking.refunded = false;
+    return booking;
+  }
+
+  cancelByPhotographer(bookingId: string): Booking {
+    const booking = this.getInStatusOrThrow(bookingId, "committed");
+    if (booking.payoutReleasedAt) {
+      throw new Error(
+        `Booking ${bookingId}'s payout has already released; cancellation refund is not supported past this point`,
+      );
+    }
+    booking.status = "cancelled";
+    booking.cancelledBy = "photographer";
+    booking.cancelledAt = new Date();
+    booking.refunded = true;
+    return booking;
   }
 
   releaseEligiblePayouts(now: Date): Booking[] {

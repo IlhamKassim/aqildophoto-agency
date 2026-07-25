@@ -35,7 +35,7 @@ function setUpSlot(eventDate: Date = new Date("2026-10-14")) {
 describe("BookingBoard", () => {
   it("requesting a Booking locks the Time Slot", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
 
     const request = board.requestBooking("student-1", slot.id, packageId, [], eventId);
 
@@ -45,7 +45,7 @@ describe("BookingBoard", () => {
 
   it("refuses a second Booking Request against an already-held Time Slot", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     board.requestBooking("student-1", slot.id, packageId, [], eventId);
 
     expect(() => board.requestBooking("student-2", slot.id, packageId, [], eventId)).toThrow();
@@ -53,7 +53,7 @@ describe("BookingBoard", () => {
 
   it("accepting a Booking Request transitions it to accepted", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const request = board.requestBooking("student-1", slot.id, packageId, [], eventId);
 
     const accepted = board.acceptBookingRequest(request.id);
@@ -63,7 +63,7 @@ describe("BookingBoard", () => {
 
   it("rejecting a Booking Request transitions it to rejected and reopens the Time Slot", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const request = board.requestBooking("student-1", slot.id, packageId, [], eventId);
 
     const rejected = board.rejectBookingRequest(request.id);
@@ -78,6 +78,7 @@ describe("BookingBoard", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
     const board = new BookingBoard(
       { timeSlots: timeSlotBoard, convocationEvents, packages },
+      openDatabase(":memory:"),
       1000,
     );
     const request = board.requestBooking("student-1", slot.id, packageId, [], eventId);
@@ -94,6 +95,7 @@ describe("BookingBoard", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
     const board = new BookingBoard(
       { timeSlots: timeSlotBoard, convocationEvents, packages },
+      openDatabase(":memory:"),
       1000,
     );
     const request = board.requestBooking("student-1", slot.id, packageId, [], eventId);
@@ -106,7 +108,7 @@ describe("BookingBoard", () => {
 
   it("paying the Commitment Payment on an accepted Booking transitions it to committed", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
 
@@ -117,7 +119,7 @@ describe("BookingBoard", () => {
 
   it("splits the RM30 Commitment Payment at the default 15% Commission rate", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
 
@@ -134,6 +136,7 @@ describe("BookingBoard", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
     const board = new BookingBoard(
       { timeSlots: timeSlotBoard, convocationEvents, packages },
+      openDatabase(":memory:"),
       undefined,
       0.2,
     );
@@ -151,7 +154,7 @@ describe("BookingBoard", () => {
 
   it("refuses to pay the Commitment Payment on a Booking that is not accepted", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
 
     expect(() => board.payCommitmentPayment(booking.id)).toThrow();
@@ -164,7 +167,7 @@ describe("BookingBoard", () => {
 
   it("leaves a freshly committed Booking's payout unreleased", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
     board.payCommitmentPayment(booking.id);
@@ -175,7 +178,7 @@ describe("BookingBoard", () => {
   it("releases a committed Booking's payout once its Convocation Event date has passed", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } =
       setUpSlot(new Date("2026-10-14"));
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
     board.payCommitmentPayment(booking.id);
@@ -189,7 +192,7 @@ describe("BookingBoard", () => {
   it("does not release a committed Booking's payout before its Convocation Event date", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } =
       setUpSlot(new Date("2026-10-14"));
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
     board.payCommitmentPayment(booking.id);
@@ -203,7 +206,7 @@ describe("BookingBoard", () => {
   it("does not touch or error on a Booking that is not committed", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } =
       setUpSlot(new Date("2026-10-14"));
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     board.requestBooking("student-1", slot.id, packageId, [], eventId);
 
     expect(() => board.releaseEligiblePayouts(new Date("2026-10-15"))).not.toThrow();
@@ -212,7 +215,7 @@ describe("BookingBoard", () => {
 
   it("cancelling by Student forfeits the Commitment Payment", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
     board.payCommitmentPayment(booking.id);
@@ -228,7 +231,7 @@ describe("BookingBoard", () => {
 
   it("cancelling by Photographer before payout release refunds the Student in full", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
     board.payCommitmentPayment(booking.id);
@@ -245,7 +248,7 @@ describe("BookingBoard", () => {
   it("refuses a Photographer cancellation once the payout has already released", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } =
       setUpSlot(new Date("2026-10-14"));
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
     board.payCommitmentPayment(booking.id);
@@ -256,7 +259,7 @@ describe("BookingBoard", () => {
 
   it("refuses to cancel a Booking that is not committed", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
 
     expect(() => board.cancelByStudent(booking.id)).toThrow();
@@ -265,7 +268,7 @@ describe("BookingBoard", () => {
 
   it("marking photos ready on a committed Booking transitions it to awaiting_final_payment", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
     board.payCommitmentPayment(booking.id);
@@ -277,7 +280,7 @@ describe("BookingBoard", () => {
 
   it("refuses to mark photos ready without a Delivery link", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
     board.payCommitmentPayment(booking.id);
@@ -287,7 +290,7 @@ describe("BookingBoard", () => {
 
   it("refuses to return the Delivery link before Final Payment is confirmed", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
     board.payCommitmentPayment(booking.id);
@@ -298,7 +301,7 @@ describe("BookingBoard", () => {
 
   it("paying the Final Payment computes total minus Commitment and splits by Commission, transitioning to delivered", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
     board.payCommitmentPayment(booking.id);
@@ -316,7 +319,7 @@ describe("BookingBoard", () => {
 
   it("returns the Delivery link after Final Payment is confirmed", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
     board.payCommitmentPayment(booking.id);
@@ -328,7 +331,7 @@ describe("BookingBoard", () => {
 
   it("refuses to pay the Final Payment on a Booking that is not awaiting_final_payment", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
     board.acceptBookingRequest(booking.id);
     board.payCommitmentPayment(booking.id);
@@ -338,9 +341,23 @@ describe("BookingBoard", () => {
 
   it("lists all Bookings regardless of status", () => {
     const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
-    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, openDatabase(":memory:"));
     const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
 
     expect(board.listAllBookings().map((b) => b.id)).toEqual([booking.id]);
+  });
+
+  it("survives re-instantiating against the same database connection", () => {
+    const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
+    const db = openDatabase(":memory:");
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages }, db);
+    const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
+
+    const reloaded = new BookingBoard(
+      { timeSlots: timeSlotBoard, convocationEvents, packages },
+      db,
+    );
+
+    expect(reloaded.listAllBookings().map((b) => b.id)).toEqual([booking.id]);
   });
 });

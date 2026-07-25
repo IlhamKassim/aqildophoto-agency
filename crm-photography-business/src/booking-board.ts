@@ -1,3 +1,5 @@
+import type Database from "better-sqlite3";
+
 export type BookingStatus =
   | "requested"
   | "accepted"
@@ -52,16 +54,65 @@ export interface BookingBoardDeps {
   packages: PackagePricing;
 }
 
+interface BookingRow {
+  id: string;
+  student_id: string;
+  time_slot_id: string;
+  package_id: string;
+  add_on_ids: string;
+  convocation_event_id: string;
+  status: BookingStatus;
+  requested_at: string;
+  expires_at: string;
+  commitment_payment: string | null;
+  payout_released_at: string | null;
+  cancelled_by: "student" | "photographer" | null;
+  cancelled_at: string | null;
+  refunded: number | null;
+  final_payment: string | null;
+  delivery_link: string | null;
+}
+
+function serializeSplit(split: CommissionSplit): string {
+  return JSON.stringify(split);
+}
+
+function deserializeSplit(json: string): CommissionSplit {
+  const parsed = JSON.parse(json);
+  return { ...parsed, paidAt: new Date(parsed.paidAt) };
+}
+
+function toBooking(row: BookingRow): Booking {
+  return {
+    id: row.id,
+    studentId: row.student_id,
+    timeSlotId: row.time_slot_id,
+    packageId: row.package_id,
+    addOnIds: JSON.parse(row.add_on_ids),
+    convocationEventId: row.convocation_event_id,
+    status: row.status,
+    requestedAt: new Date(row.requested_at),
+    expiresAt: new Date(row.expires_at),
+    ...(row.commitment_payment ? { commitmentPayment: deserializeSplit(row.commitment_payment) } : {}),
+    ...(row.payout_released_at ? { payoutReleasedAt: new Date(row.payout_released_at) } : {}),
+    ...(row.cancelled_by ? { cancelledBy: row.cancelled_by } : {}),
+    ...(row.cancelled_at ? { cancelledAt: new Date(row.cancelled_at) } : {}),
+    ...(row.refunded !== null ? { refunded: row.refunded === 1 } : {}),
+    ...(row.final_payment ? { finalPayment: deserializeSplit(row.final_payment) } : {}),
+  };
+}
+
 const DEFAULT_RESPONSE_DEADLINE_MS = 48 * 60 * 60 * 1000;
 const DEFAULT_COMMISSION_RATE = 0.15;
 const COMMITMENT_PAYMENT_AMOUNT = 30;
 
-export class BookingBoard {
-  private readonly bookings = new Map<string, Booking>();
-  private readonly deliveryLinks = new Map<string, string>();
+const BOOKING_COLUMNS =
+  "id, student_id, time_slot_id, package_id, add_on_ids, convocation_event_id, status, requested_at, expires_at, commitment_payment, payout_released_at, cancelled_by, cancelled_at, refunded, final_payment, delivery_link";
 
+export class BookingBoard {
   constructor(
     private readonly deps: BookingBoardDeps,
+    private readonly db: Database.Database,
     private readonly responseDeadlineMs: number = DEFAULT_RESPONSE_DEADLINE_MS,
     private readonly commissionRate: number = DEFAULT_COMMISSION_RATE,
   ) {}
@@ -86,40 +137,60 @@ export class BookingBoard {
       requestedAt,
       expiresAt: new Date(requestedAt.getTime() + this.responseDeadlineMs),
     };
-    this.bookings.set(booking.id, booking);
+    this.db
+      .prepare(
+        `INSERT INTO bookings (id, student_id, time_slot_id, package_id, add_on_ids, convocation_event_id, status, requested_at, expires_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .run(
+        booking.id,
+        booking.studentId,
+        booking.timeSlotId,
+        booking.packageId,
+        JSON.stringify(booking.addOnIds),
+        booking.convocationEventId,
+        booking.status,
+        booking.requestedAt.toISOString(),
+        booking.expiresAt.toISOString(),
+      );
     return booking;
   }
 
   acceptBookingRequest(bookingId: string): Booking {
-    const booking = this.getInStatusOrThrow(bookingId, "requested");
-    booking.status = "accepted";
-    return booking;
+    this.getInStatusOrThrow(bookingId, "requested");
+    this.setStatus(bookingId, "accepted");
+    return this.getOrThrow(bookingId);
   }
 
   rejectBookingRequest(bookingId: string): Booking {
     const booking = this.getInStatusOrThrow(bookingId, "requested");
-    booking.status = "rejected";
+    this.setStatus(bookingId, "rejected");
     this.deps.timeSlots.reopenTimeSlot(booking.timeSlotId);
-    return booking;
+    return this.getOrThrow(bookingId);
   }
 
   expireStaleBookingRequests(now: Date): Booking[] {
+    const rows = this.db
+      .prepare(`SELECT ${BOOKING_COLUMNS} FROM bookings WHERE status = 'requested'`)
+      .all() as BookingRow[];
     const expired: Booking[] = [];
-    for (const booking of this.bookings.values()) {
-      if (booking.status === "requested" && booking.expiresAt <= now) {
-        booking.status = "expired";
+    for (const booking of rows.map(toBooking)) {
+      if (booking.expiresAt <= now) {
+        this.setStatus(booking.id, "expired");
         this.deps.timeSlots.reopenTimeSlot(booking.timeSlotId);
-        expired.push(booking);
+        expired.push(this.getOrThrow(booking.id));
       }
     }
     return expired;
   }
 
   payCommitmentPayment(bookingId: string): Booking {
-    const booking = this.getInStatusOrThrow(bookingId, "accepted");
-    booking.commitmentPayment = this.computeSplit(COMMITMENT_PAYMENT_AMOUNT);
-    booking.status = "committed";
-    return booking;
+    this.getInStatusOrThrow(bookingId, "accepted");
+    const split = this.computeSplit(COMMITMENT_PAYMENT_AMOUNT);
+    this.db
+      .prepare("UPDATE bookings SET commitment_payment = ?, status = 'committed' WHERE id = ?")
+      .run(serializeSplit(split), bookingId);
+    return this.getOrThrow(bookingId);
   }
 
   getBooking(bookingId: string): Booking {
@@ -127,16 +198,18 @@ export class BookingBoard {
   }
 
   listAllBookings(): Booking[] {
-    return [...this.bookings.values()];
+    const rows = this.db.prepare(`SELECT ${BOOKING_COLUMNS} FROM bookings`).all() as BookingRow[];
+    return rows.map(toBooking);
   }
 
   cancelByStudent(bookingId: string): Booking {
-    const booking = this.getInStatusOrThrow(bookingId, "committed");
-    booking.status = "cancelled";
-    booking.cancelledBy = "student";
-    booking.cancelledAt = new Date();
-    booking.refunded = false;
-    return booking;
+    this.getInStatusOrThrow(bookingId, "committed");
+    this.db
+      .prepare(
+        "UPDATE bookings SET status = 'cancelled', cancelled_by = 'student', cancelled_at = ?, refunded = 0 WHERE id = ?",
+      )
+      .run(new Date().toISOString(), bookingId);
+    return this.getOrThrow(bookingId);
   }
 
   cancelByPhotographer(bookingId: string): Booking {
@@ -146,25 +219,30 @@ export class BookingBoard {
         `Booking ${bookingId}'s payout has already released; cancellation refund is not supported past this point`,
       );
     }
-    booking.status = "cancelled";
-    booking.cancelledBy = "photographer";
-    booking.cancelledAt = new Date();
-    booking.refunded = true;
-    return booking;
+    this.db
+      .prepare(
+        "UPDATE bookings SET status = 'cancelled', cancelled_by = 'photographer', cancelled_at = ?, refunded = 1 WHERE id = ?",
+      )
+      .run(new Date().toISOString(), bookingId);
+    return this.getOrThrow(bookingId);
   }
 
   releaseEligiblePayouts(now: Date): Booking[] {
+    const rows = this.db
+      .prepare(
+        `SELECT ${BOOKING_COLUMNS} FROM bookings WHERE status = 'committed' AND payout_released_at IS NULL`,
+      )
+      .all() as BookingRow[];
     const released: Booking[] = [];
-    for (const booking of this.bookings.values()) {
-      if (booking.status !== "committed" || booking.payoutReleasedAt) {
-        continue;
-      }
+    for (const booking of rows.map(toBooking)) {
       const eventDate = this.deps.convocationEvents.getConvocationEventDate(
         booking.convocationEventId,
       );
       if (eventDate <= now) {
-        booking.payoutReleasedAt = now;
-        released.push(booking);
+        this.db
+          .prepare("UPDATE bookings SET payout_released_at = ? WHERE id = ?")
+          .run(now.toISOString(), booking.id);
+        released.push(this.getOrThrow(booking.id));
       }
     }
     return released;
@@ -174,23 +252,35 @@ export class BookingBoard {
     if (!deliveryLink) {
       throw new Error("A Delivery link is required to mark photos ready");
     }
-    const booking = this.getInStatusOrThrow(bookingId, "committed");
-    this.deliveryLinks.set(bookingId, deliveryLink);
-    booking.status = "awaiting_final_payment";
-    return booking;
+    this.getInStatusOrThrow(bookingId, "committed");
+    this.db
+      .prepare(
+        "UPDATE bookings SET delivery_link = ?, status = 'awaiting_final_payment' WHERE id = ?",
+      )
+      .run(deliveryLink, bookingId);
+    return this.getOrThrow(bookingId);
   }
 
   payFinalPayment(bookingId: string): Booking {
     const booking = this.getInStatusOrThrow(bookingId, "awaiting_final_payment");
     const totalPrice = this.deps.packages.getTotalPrice(booking.packageId, booking.addOnIds);
-    booking.finalPayment = this.computeSplit(totalPrice - booking.commitmentPayment!.amount);
-    booking.status = "delivered";
-    return booking;
+    const split = this.computeSplit(totalPrice - booking.commitmentPayment!.amount);
+    this.db
+      .prepare("UPDATE bookings SET final_payment = ?, status = 'delivered' WHERE id = ?")
+      .run(serializeSplit(split), bookingId);
+    return this.getOrThrow(bookingId);
   }
 
   getDeliveryLink(bookingId: string): string {
-    const booking = this.getInStatusOrThrow(bookingId, "delivered");
-    return this.deliveryLinks.get(booking.id)!;
+    this.getInStatusOrThrow(bookingId, "delivered");
+    const row = this.db
+      .prepare("SELECT delivery_link FROM bookings WHERE id = ?")
+      .get(bookingId) as { delivery_link: string | null };
+    return row.delivery_link!;
+  }
+
+  private setStatus(bookingId: string, status: BookingStatus): void {
+    this.db.prepare("UPDATE bookings SET status = ? WHERE id = ?").run(status, bookingId);
   }
 
   private getInStatusOrThrow(bookingId: string, expectedStatus: BookingStatus): Booking {
@@ -202,11 +292,13 @@ export class BookingBoard {
   }
 
   private getOrThrow(bookingId: string): Booking {
-    const booking = this.bookings.get(bookingId);
-    if (!booking) {
+    const row = this.db
+      .prepare(`SELECT ${BOOKING_COLUMNS} FROM bookings WHERE id = ?`)
+      .get(bookingId) as BookingRow | undefined;
+    if (!row) {
       throw new Error(`No Booking found with id ${bookingId}`);
     }
-    return booking;
+    return toBooking(row);
   }
 
   private computeSplit(amount: number): CommissionSplit {

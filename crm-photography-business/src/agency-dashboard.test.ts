@@ -31,7 +31,10 @@ function setUpBookingBoard() {
     price: 300,
     description: "2hrs, 30 edited photos",
   });
-  const bookings = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+  const bookings = new BookingBoard(
+    { timeSlots: timeSlotBoard, convocationEvents, packages },
+    openDatabase(":memory:"),
+  );
   return { bookings, slot, eventId: event.id, packageId: pkg.id };
 }
 

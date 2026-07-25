@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BookingRequestBoard } from "./booking-request-board.js";
+import { BookingBoard } from "./booking-board.js";
 import { TimeSlotBoard } from "./time-slot-board.js";
 
 function approvalOf(approvedIds: string[]) {
@@ -16,10 +16,10 @@ function setUpSlot() {
   return { timeSlotBoard, slot };
 }
 
-describe("BookingRequestBoard", () => {
+describe("BookingBoard", () => {
   it("requesting a Booking locks the Time Slot", () => {
     const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingRequestBoard({ timeSlots: timeSlotBoard });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard });
 
     const request = board.requestBooking("student-1", slot.id, "package-1", []);
 
@@ -29,7 +29,7 @@ describe("BookingRequestBoard", () => {
 
   it("refuses a second Booking Request against an already-held Time Slot", () => {
     const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingRequestBoard({ timeSlots: timeSlotBoard });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard });
     board.requestBooking("student-1", slot.id, "package-1", []);
 
     expect(() => board.requestBooking("student-2", slot.id, "package-1", [])).toThrow();
@@ -37,7 +37,7 @@ describe("BookingRequestBoard", () => {
 
   it("accepting a Booking Request transitions it to accepted", () => {
     const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingRequestBoard({ timeSlots: timeSlotBoard });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard });
     const request = board.requestBooking("student-1", slot.id, "package-1", []);
 
     const accepted = board.acceptBookingRequest(request.id);
@@ -47,7 +47,7 @@ describe("BookingRequestBoard", () => {
 
   it("rejecting a Booking Request transitions it to rejected and reopens the Time Slot", () => {
     const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingRequestBoard({ timeSlots: timeSlotBoard });
+    const board = new BookingBoard({ timeSlots: timeSlotBoard });
     const request = board.requestBooking("student-1", slot.id, "package-1", []);
 
     const rejected = board.rejectBookingRequest(request.id);
@@ -60,7 +60,7 @@ describe("BookingRequestBoard", () => {
 
   it("expires a Booking Request past its response deadline and reopens the Time Slot", () => {
     const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingRequestBoard({ timeSlots: timeSlotBoard }, 1000);
+    const board = new BookingBoard({ timeSlots: timeSlotBoard }, 1000);
     const request = board.requestBooking("student-1", slot.id, "package-1", []);
 
     const expired = board.expireStaleBookingRequests(new Date(request.expiresAt.getTime() + 1));
@@ -73,7 +73,7 @@ describe("BookingRequestBoard", () => {
 
   it("leaves a Booking Request within its response deadline untouched", () => {
     const { timeSlotBoard, slot } = setUpSlot();
-    const board = new BookingRequestBoard({ timeSlots: timeSlotBoard }, 1000);
+    const board = new BookingBoard({ timeSlots: timeSlotBoard }, 1000);
     const request = board.requestBooking("student-1", slot.id, "package-1", []);
 
     const expired = board.expireStaleBookingRequests(new Date(request.expiresAt.getTime() - 1));

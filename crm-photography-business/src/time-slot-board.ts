@@ -9,7 +9,7 @@ export interface TimeSlot extends TimeSlotWindow {
   id: string;
   photographerId: string;
   convocationEventId: string;
-  status: "open";
+  status: "open" | "held";
 }
 
 export class TimeSlotBoard {
@@ -59,6 +59,26 @@ export class TimeSlotBoard {
         slot.photographerId === photographerId &&
         slot.status === "open",
     );
+  }
+
+  lockTimeSlot(timeSlotId: string): void {
+    const slot = this.getSlotOrThrow(timeSlotId);
+    if (slot.status !== "open") {
+      throw new Error(`Time Slot ${timeSlotId} is not open`);
+    }
+    slot.status = "held";
+  }
+
+  reopenTimeSlot(timeSlotId: string): void {
+    this.getSlotOrThrow(timeSlotId).status = "open";
+  }
+
+  private getSlotOrThrow(timeSlotId: string): TimeSlot {
+    const slot = this.timeSlots.find((candidate) => candidate.id === timeSlotId);
+    if (!slot) {
+      throw new Error(`No Time Slot found with id ${timeSlotId}`);
+    }
+    return slot;
   }
 
   private hasOptedIn(photographerId: string, convocationEventId: string): boolean {

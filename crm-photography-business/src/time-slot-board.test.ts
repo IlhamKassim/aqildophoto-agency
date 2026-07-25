@@ -63,4 +63,45 @@ describe("TimeSlotBoard", () => {
 
     expect(board.listOpenTimeSlots("event-1", "photographer-1")).toEqual([slot]);
   });
+
+  it("locking a Time Slot removes it from the open list", () => {
+    const board = new TimeSlotBoard(approvalOf(["photographer-1"]));
+    board.optIn("photographer-1", "event-1");
+    const slot = board.defineTimeSlot("photographer-1", "event-1", {
+      start: new Date("2026-10-14T09:00:00"),
+      end: new Date("2026-10-14T09:30:00"),
+    });
+
+    board.lockTimeSlot(slot.id);
+
+    expect(board.listOpenTimeSlots("event-1", "photographer-1")).toEqual([]);
+  });
+
+  it("throws when locking a Time Slot that is not open", () => {
+    const board = new TimeSlotBoard(approvalOf(["photographer-1"]));
+    board.optIn("photographer-1", "event-1");
+    const slot = board.defineTimeSlot("photographer-1", "event-1", {
+      start: new Date("2026-10-14T09:00:00"),
+      end: new Date("2026-10-14T09:30:00"),
+    });
+    board.lockTimeSlot(slot.id);
+
+    expect(() => board.lockTimeSlot(slot.id)).toThrow();
+  });
+
+  it("reopening a Time Slot makes it available again", () => {
+    const board = new TimeSlotBoard(approvalOf(["photographer-1"]));
+    board.optIn("photographer-1", "event-1");
+    const slot = board.defineTimeSlot("photographer-1", "event-1", {
+      start: new Date("2026-10-14T09:00:00"),
+      end: new Date("2026-10-14T09:30:00"),
+    });
+    board.lockTimeSlot(slot.id);
+
+    board.reopenTimeSlot(slot.id);
+
+    expect(board.listOpenTimeSlots("event-1", "photographer-1")).toEqual([
+      { ...slot, status: "open" },
+    ]);
+  });
 });

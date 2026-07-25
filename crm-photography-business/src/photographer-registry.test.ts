@@ -63,4 +63,13 @@ describe("PhotographerRegistry", () => {
     expect(() => registry.rejectPhotographer(approved.id)).toThrow();
     expect(() => registry.rejectPhotographer(rejected.id)).toThrow();
   });
+
+  it("lists all Photographers regardless of status", () => {
+    const registry = new PhotographerRegistry();
+    const pending = registry.registerPhotographer({ name: "Aisyah Rahman" });
+    const approved = registry.registerPhotographer({ name: "Bakri Osman" });
+    registry.approvePhotographer(approved.id);
+
+    expect(registry.listAllPhotographers().map((p) => p.id)).toEqual([pending.id, approved.id]);
+  });
 });

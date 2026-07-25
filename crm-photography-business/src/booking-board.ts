@@ -126,6 +126,10 @@ export class BookingBoard {
     return this.getOrThrow(bookingId);
   }
 
+  listAllBookings(): Booking[] {
+    return [...this.bookings.values()];
+  }
+
   cancelByStudent(bookingId: string): Booking {
     const booking = this.getInStatusOrThrow(bookingId, "committed");
     booking.status = "cancelled";

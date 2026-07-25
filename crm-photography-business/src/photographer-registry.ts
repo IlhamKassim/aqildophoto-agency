@@ -38,6 +38,10 @@ export class PhotographerRegistry {
     return this.photographers.get(photographerId)?.status === "approved";
   }
 
+  listAllPhotographers(): Photographer[] {
+    return [...this.photographers.values()];
+  }
+
   private getPendingOrThrow(photographerId: string): Photographer {
     const photographer = this.photographers.get(photographerId);
     if (!photographer) {

@@ -334,4 +334,12 @@ describe("BookingBoard", () => {
 
     expect(() => board.payFinalPayment(booking.id)).toThrow();
   });
+
+  it("lists all Bookings regardless of status", () => {
+    const { convocationEvents, timeSlotBoard, slot, eventId, packages, packageId } = setUpSlot();
+    const board = new BookingBoard({ timeSlots: timeSlotBoard, convocationEvents, packages });
+    const booking = board.requestBooking("student-1", slot.id, packageId, [], eventId);
+
+    expect(board.listAllBookings().map((b) => b.id)).toEqual([booking.id]);
+  });
 });

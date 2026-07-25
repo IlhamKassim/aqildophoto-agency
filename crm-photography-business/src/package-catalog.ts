@@ -28,6 +28,7 @@ export interface PackageWithAddOns extends Package {
 export class PackageCatalog {
   private readonly packages = new Map<string, Package>();
   private readonly addOnsByPackageId = new Map<string, AddOn[]>();
+  private readonly addOnsById = new Map<string, AddOn>();
 
   constructor(private readonly photographerApproval: PhotographerApprovalCheck) {}
 
@@ -55,6 +56,7 @@ export class PackageCatalog {
       ...details,
     };
     this.addOnsByPackageId.get(packageId)!.push(addOn);
+    this.addOnsById.set(addOn.id, addOn);
     return addOn;
   }
 
@@ -62,5 +64,20 @@ export class PackageCatalog {
     return [...this.packages.values()]
       .filter((pkg) => pkg.photographerId === photographerId)
       .map((pkg) => ({ ...pkg, addOns: this.addOnsByPackageId.get(pkg.id) ?? [] }));
+  }
+
+  getTotalPrice(packageId: string, addOnIds: string[]): number {
+    const pkg = this.packages.get(packageId);
+    if (!pkg) {
+      throw new Error(`No Package found with id ${packageId}`);
+    }
+    const addOnsTotal = addOnIds.reduce((sum, addOnId) => {
+      const addOn = this.addOnsById.get(addOnId);
+      if (!addOn) {
+        throw new Error(`No Add-on found with id ${addOnId}`);
+      }
+      return sum + addOn.price;
+    }, 0);
+    return pkg.price + addOnsTotal;
   }
 }

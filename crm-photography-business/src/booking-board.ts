@@ -4,7 +4,9 @@ export type BookingStatus =
   | "rejected"
   | "expired"
   | "committed"
-  | "cancelled";
+  | "cancelled"
+  | "awaiting_final_payment"
+  | "delivered";
 
 export interface CommissionSplit {
   amount: number;
@@ -28,6 +30,7 @@ export interface Booking {
   cancelledBy?: "student" | "photographer";
   cancelledAt?: Date;
   refunded?: boolean;
+  finalPayment?: CommissionSplit;
 }
 
 export interface TimeSlotLock {
@@ -39,9 +42,14 @@ export interface ConvocationEventDateLookup {
   getConvocationEventDate(convocationEventId: string): Date;
 }
 
+export interface PackagePricing {
+  getTotalPrice(packageId: string, addOnIds: string[]): number;
+}
+
 export interface BookingBoardDeps {
   timeSlots: TimeSlotLock;
   convocationEvents: ConvocationEventDateLookup;
+  packages: PackagePricing;
 }
 
 const DEFAULT_RESPONSE_DEADLINE_MS = 48 * 60 * 60 * 1000;
@@ -50,6 +58,7 @@ const COMMITMENT_PAYMENT_AMOUNT = 30;
 
 export class BookingBoard {
   private readonly bookings = new Map<string, Booking>();
+  private readonly deliveryLinks = new Map<string, string>();
 
   constructor(
     private readonly deps: BookingBoardDeps,
@@ -108,13 +117,7 @@ export class BookingBoard {
 
   payCommitmentPayment(bookingId: string): Booking {
     const booking = this.getInStatusOrThrow(bookingId, "accepted");
-    const agencyShare = COMMITMENT_PAYMENT_AMOUNT * this.commissionRate;
-    booking.commitmentPayment = {
-      amount: COMMITMENT_PAYMENT_AMOUNT,
-      agencyShare,
-      photographerShare: COMMITMENT_PAYMENT_AMOUNT - agencyShare,
-      paidAt: new Date(),
-    };
+    booking.commitmentPayment = this.computeSplit(COMMITMENT_PAYMENT_AMOUNT);
     booking.status = "committed";
     return booking;
   }
@@ -163,6 +166,29 @@ export class BookingBoard {
     return released;
   }
 
+  markPhotosReady(bookingId: string, deliveryLink: string): Booking {
+    if (!deliveryLink) {
+      throw new Error("A Delivery link is required to mark photos ready");
+    }
+    const booking = this.getInStatusOrThrow(bookingId, "committed");
+    this.deliveryLinks.set(bookingId, deliveryLink);
+    booking.status = "awaiting_final_payment";
+    return booking;
+  }
+
+  payFinalPayment(bookingId: string): Booking {
+    const booking = this.getInStatusOrThrow(bookingId, "awaiting_final_payment");
+    const totalPrice = this.deps.packages.getTotalPrice(booking.packageId, booking.addOnIds);
+    booking.finalPayment = this.computeSplit(totalPrice - booking.commitmentPayment!.amount);
+    booking.status = "delivered";
+    return booking;
+  }
+
+  getDeliveryLink(bookingId: string): string {
+    const booking = this.getInStatusOrThrow(bookingId, "delivered");
+    return this.deliveryLinks.get(booking.id)!;
+  }
+
   private getInStatusOrThrow(bookingId: string, expectedStatus: BookingStatus): Booking {
     const booking = this.getOrThrow(bookingId);
     if (booking.status !== expectedStatus) {
@@ -177,5 +203,15 @@ export class BookingBoard {
       throw new Error(`No Booking found with id ${bookingId}`);
     }
     return booking;
+  }
+
+  private computeSplit(amount: number): CommissionSplit {
+    const agencyShare = amount * this.commissionRate;
+    return {
+      amount,
+      agencyShare,
+      photographerShare: amount - agencyShare,
+      paidAt: new Date(),
+    };
   }
 }

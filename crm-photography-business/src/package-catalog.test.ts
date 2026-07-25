@@ -78,4 +78,18 @@ describe("PackageCatalog", () => {
       },
     ]);
   });
+
+  it("computes the total price of a Package plus selected Add-ons", () => {
+    const catalog = new PackageCatalog(approvalOf(["photographer-1"]));
+    const pkg = catalog.createPackage("photographer-1", {
+      name: "Basic",
+      price: 300,
+      description: "2hrs, 30 edited photos",
+    });
+    const addOn = catalog.addAddOn(pkg.id, { name: "Extra hour", price: 100 });
+
+    const total = catalog.getTotalPrice(pkg.id, [addOn.id]);
+
+    expect(total).toBe(400);
+  });
 });

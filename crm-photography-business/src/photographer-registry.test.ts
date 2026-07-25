@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { PhotographerRegistry } from "./photographer-registry.js";
+import { openDatabase } from "./database.js";
+
+function setUp() {
+  return new PhotographerRegistry(openDatabase(":memory:"));
+}
 
 describe("PhotographerRegistry", () => {
   it("registers a Photographer with status pending", () => {
-    const registry = new PhotographerRegistry();
+    const registry = setUp();
 
     const photographer = registry.registerPhotographer({ name: "Aisyah Rahman" });
 
@@ -11,7 +16,7 @@ describe("PhotographerRegistry", () => {
   });
 
   it("approves a pending Photographer", () => {
-    const registry = new PhotographerRegistry();
+    const registry = setUp();
     const photographer = registry.registerPhotographer({ name: "Aisyah Rahman" });
 
     const approved = registry.approvePhotographer(photographer.id);
@@ -20,7 +25,7 @@ describe("PhotographerRegistry", () => {
   });
 
   it("rejects a pending Photographer", () => {
-    const registry = new PhotographerRegistry();
+    const registry = setUp();
     const photographer = registry.registerPhotographer({ name: "Aisyah Rahman" });
 
     const rejected = registry.rejectPhotographer(photographer.id);
@@ -29,7 +34,7 @@ describe("PhotographerRegistry", () => {
   });
 
   it("treats only approved Photographers as isApproved", () => {
-    const registry = new PhotographerRegistry();
+    const registry = setUp();
     const pending = registry.registerPhotographer({ name: "Aisyah Rahman" });
     const approved = registry.registerPhotographer({ name: "Bakri Osman" });
     const rejected = registry.registerPhotographer({ name: "Chong Wei" });
@@ -43,7 +48,7 @@ describe("PhotographerRegistry", () => {
   });
 
   it("throws when approving a Photographer that is not pending", () => {
-    const registry = new PhotographerRegistry();
+    const registry = setUp();
     const approved = registry.registerPhotographer({ name: "Aisyah Rahman" });
     registry.approvePhotographer(approved.id);
     const rejected = registry.registerPhotographer({ name: "Bakri Osman" });
@@ -54,7 +59,7 @@ describe("PhotographerRegistry", () => {
   });
 
   it("throws when rejecting a Photographer that is not pending", () => {
-    const registry = new PhotographerRegistry();
+    const registry = setUp();
     const approved = registry.registerPhotographer({ name: "Aisyah Rahman" });
     registry.approvePhotographer(approved.id);
     const rejected = registry.registerPhotographer({ name: "Bakri Osman" });
@@ -65,11 +70,21 @@ describe("PhotographerRegistry", () => {
   });
 
   it("lists all Photographers regardless of status", () => {
-    const registry = new PhotographerRegistry();
+    const registry = setUp();
     const pending = registry.registerPhotographer({ name: "Aisyah Rahman" });
     const approved = registry.registerPhotographer({ name: "Bakri Osman" });
     registry.approvePhotographer(approved.id);
 
     expect(registry.listAllPhotographers().map((p) => p.id)).toEqual([pending.id, approved.id]);
+  });
+
+  it("survives re-instantiating against the same database connection", () => {
+    const db = openDatabase(":memory:");
+    const registry = new PhotographerRegistry(db);
+    const photographer = registry.registerPhotographer({ name: "Aisyah Rahman" });
+
+    const reloaded = new PhotographerRegistry(db);
+
+    expect(reloaded.listAllPhotographers().map((p) => p.id)).toEqual([photographer.id]);
   });
 });

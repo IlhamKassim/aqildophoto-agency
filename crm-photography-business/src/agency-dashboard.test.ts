@@ -5,6 +5,7 @@ import { TimeSlotBoard } from "./time-slot-board.js";
 import { ConvocationEventRegistry } from "./convocation-event-registry.js";
 import { PackageCatalog } from "./package-catalog.js";
 import { PhotographerRegistry } from "./photographer-registry.js";
+import { openDatabase } from "./database.js";
 
 function approvalOf(approvedIds: string[]) {
   return { isApproved: (photographerId: string) => approvedIds.includes(photographerId) };
@@ -38,7 +39,7 @@ describe("AgencyDashboard", () => {
   it("delegates listBookings to the BookingBoard", () => {
     const { bookings, slot, eventId, packageId } = setUpBookingBoard();
     const booking = bookings.requestBooking("student-1", slot.id, packageId, [], eventId);
-    const photographers = new PhotographerRegistry();
+    const photographers = new PhotographerRegistry(openDatabase(":memory:"));
     const dashboard = new AgencyDashboard({ bookings, photographers });
 
     expect(dashboard.listBookings().map((b) => b.id)).toEqual([booking.id]);
@@ -46,7 +47,7 @@ describe("AgencyDashboard", () => {
 
   it("delegates listPhotographers to the PhotographerRegistry", () => {
     const { bookings } = setUpBookingBoard();
-    const photographers = new PhotographerRegistry();
+    const photographers = new PhotographerRegistry(openDatabase(":memory:"));
     const photographer = photographers.registerPhotographer({ name: "Aisyah Rahman" });
     const dashboard = new AgencyDashboard({ bookings, photographers });
 

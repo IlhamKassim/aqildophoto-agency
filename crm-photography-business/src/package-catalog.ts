@@ -1,6 +1,4 @@
-export interface PhotographerApprovalCheck {
-  isApproved(photographerId: string): boolean;
-}
+import type { PhotographerApprovalCheck } from "./photographer-approval.js";
 
 export interface PackageDetails {
   name: string;

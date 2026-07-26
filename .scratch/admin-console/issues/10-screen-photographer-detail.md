@@ -55,10 +55,10 @@ build output — both invisible to TypeScript and the test suite:
 
 ### Follow-ups (not done — out of scope for this ticket)
 
-- **CSS duplication.** Button, input, field, banner and `.srOnly` rules are now
-  copy-pasted across three CSS modules (`photographers`, `convocation-events`,
-  `[id]/detail`). Worth extracting shared primitives before a fourth screen
-  lands.
+- ~~**CSS duplication.**~~ Done — extracted to `app/shared.module.css`, which
+  the three screen modules pull in via `composes`. Screens keep their own class
+  names, so no component changed. Tickets 11 and 12 should compose from there
+  rather than starting a fourth copy.
 - **`datetime-local` values are lost on a failed submit.** The re-render clears
   the uncontrolled inputs, so the operator retypes both times after an error.
   Fixable by echoing submitted values back through the action state.

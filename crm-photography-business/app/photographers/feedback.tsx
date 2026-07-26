@@ -75,16 +75,23 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
   return (
     <ReviewContext.Provider value={{ dispatch, pending }}>
       <AnnounceContext.Provider value={announce}>
-        {message.error ? (
-          <p role="alert" className={`${styles.banner} ${styles.bannerError}`}>
-            <span className={styles.srOnly}>Error: </span>
-            {message.error}
-          </p>
-        ) : null}
-        {message.success ? (
-          <p role="status" className={`${styles.banner} ${styles.bannerSuccess}`}>
-            {message.success}
-          </p>
+        {message.error || message.success ? (
+          <div className={styles.bannerSlot}>
+            {message.error ? (
+              <p role="alert" className={`${styles.banner} ${styles.bannerError}`}>
+                <span className={styles.srOnly}>Error: </span>
+                {message.error}
+              </p>
+            ) : null}
+            {message.success ? (
+              <p
+                role="status"
+                className={`${styles.banner} ${styles.bannerSuccess}`}
+              >
+                {message.success}
+              </p>
+            ) : null}
+          </div>
         ) : null}
         {children}
       </AnnounceContext.Provider>

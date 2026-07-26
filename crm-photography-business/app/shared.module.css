@@ -1,0 +1,250 @@
+/*
+ * Shared UI primitives for the Agency Admin Console.
+ *
+ * Every screen was growing its own copy of these rules; by the third screen the
+ * copies had already drifted (see the button border note below). Screen-level
+ * modules pull them in with `composes: … from "../shared.module.css"` so their
+ * own class names stay unchanged and the components need no edits.
+ *
+ * What belongs here: a rule that is genuinely identical across screens.
+ * What does not: anything a screen needs to look different. Compose the shared
+ * rule OR write a local one — never both for the same property, because which
+ * wins then depends on stylesheet order rather than on anything you can read.
+ *
+ * Colours and spacing still come from the tokens in globals.css.
+ */
+
+/* ---- Page shell ---- */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: var(--space-1) 0 0;
+  font-size: 0.875rem;
+  color: var(--color-muted-foreground);
+}
+
+/* A header with the screen title on the left and its primary action on the
+   right. Screens whose header is a plain title row keep that local. */
+.pageHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+/* ---- Buttons ---- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  /* 44px min touch target per the accessibility rules. */
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  /* --color-border-control (4.76:1), not --color-border (1.22:1). On an
+     unfilled button the border IS the control boundary, so it has to carry
+     WCAG 1.4.11 on its own. The first two screens used the soft divider colour
+     here and got away with it only because their bare buttons all override the
+     border themselves. */
+  border: 1px solid var(--color-border-control);
+  background: var(--color-surface);
+  color: var(--color-foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background var(--transition), border-color var(--transition),
+    color var(--transition);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--color-muted);
+}
+
+.primaryButton {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #1b389b;
+}
+
+/* ---- Form controls ---- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.input {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--color-foreground);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+}
+
+.textarea {
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--color-foreground);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+  resize: vertical;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-muted-foreground);
+}
+
+/* ---- Feedback ---- */
+
+/* No outer spacing on purpose: a banner sits in a flex column on some screens
+   and needs a bottom margin on others. Screens that need spacing put it on a
+   wrapper, so this shorthand never competes with a local margin rule. */
+.banner {
+  margin: 0;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  border-left: 3px solid currentColor;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* --color-destructive is only 3.95:1 on this tint; the darker rejected tone
+   reaches 5.30:1. Error text is the most important text on the screen. */
+.bannerError {
+  color: var(--color-rejected);
+  background: var(--color-rejected-bg);
+}
+
+.bannerSuccess {
+  color: var(--color-approved);
+  background: var(--color-approved-bg);
+}
+
+/* ---- Empty state card ---- */
+
+.empty {
+  padding: var(--space-8);
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+}
+
+.emptyTitle {
+  margin: 0 0 var(--space-1);
+  font-weight: 600;
+}
+
+.emptyBody {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-muted-foreground);
+}
+
+/* ---- Data table ---- */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.table th {
+  text-align: left;
+  /* 12px floor — 11px falls below the minimum legible size. */
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+  font-size: 0.875rem;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Below 640px the table stacks into cards: the header row is dropped, so any
+   column whose meaning is not self-evident needs its own inline label. */
+@media (max-width: 640px) {
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tr {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .table td {
+    border-bottom: none;
+    padding: var(--space-1) var(--space-4);
+    text-align: left;
+  }
+}
+
+/* ---- Utilities ---- */
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,0 +1,246 @@
+/*
+ * Bookings screen. Shared primitives come from ../shared.module.css;
+ * only what is specific to this screen lives here.
+ */
+
+.page {
+  composes: page from "../shared.module.css";
+}
+
+.pageHeader {
+  composes: pageHeader from "../shared.module.css";
+}
+
+.title {
+  composes: title from "../shared.module.css";
+}
+
+.subtitle {
+  composes: subtitle from "../shared.module.css";
+}
+
+.srOnly {
+  composes: srOnly from "../shared.module.css";
+}
+
+/* ---- Table ---- */
+
+.table {
+  composes: table from "../shared.module.css";
+}
+
+/* Rows carry more than one fact per cell (a Package and who shoots it, a
+   Commitment split and a Final one), so cells stack rather than sit inline. */
+.table td {
+  vertical-align: top;
+}
+
+.nameCell {
+  font-weight: 500;
+}
+
+/* Secondary facts inside a cell: smaller, muted, one per line. */
+.rowMeta {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--color-muted-foreground);
+}
+
+.paymentsCell {
+  min-width: 14rem;
+}
+
+.deliveryLink {
+  display: inline-block;
+  margin-top: var(--space-1);
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.actionsHeader,
+.actionsCell {
+  text-align: right;
+}
+
+/* ---- Status badge ---- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pending {
+  color: var(--color-pending);
+  background: var(--color-pending-bg);
+}
+
+.approved {
+  color: var(--color-approved);
+  background: var(--color-approved-bg);
+}
+
+.rejected {
+  color: var(--color-rejected);
+  background: var(--color-rejected-bg);
+}
+
+/* ---- Buttons ---- */
+
+.button {
+  composes: button from "../shared.module.css";
+}
+
+.primaryButton {
+  composes: primaryButton from "../shared.module.css";
+}
+
+.approveButton {
+  border-color: var(--color-approved);
+  color: var(--color-approved);
+}
+
+.approveButton:hover:not(:disabled) {
+  background: var(--color-approved-bg);
+}
+
+.rejectButton {
+  border-color: var(--color-destructive);
+  color: var(--color-destructive);
+}
+
+.rejectButton:hover:not(:disabled) {
+  background: var(--color-rejected-bg);
+}
+
+/* A Committed Booking offers three moves, and their labels are sentences
+   rather than words — they stack instead of sitting in a row. */
+.actionStack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.deliveryForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  text-align: left;
+  background: var(--color-muted);
+  border-radius: var(--radius);
+}
+
+/* ---- Request panel ---- */
+
+.requestPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.requestForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(26rem, 100%);
+  padding: var(--space-4);
+  text-align: left;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.addOns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* 44px min touch target per the accessibility rules. */
+  min-height: 44px;
+  font-size: 0.875rem;
+}
+
+.field {
+  composes: field from "../shared.module.css";
+}
+
+.label {
+  composes: label from "../shared.module.css";
+}
+
+.input {
+  composes: input from "../shared.module.css";
+}
+
+.hint {
+  composes: hint from "../shared.module.css";
+}
+
+/* ---- Feedback banner (page level, survives row unmount) ---- */
+
+.bannerSlot {
+  margin-bottom: var(--space-4);
+}
+
+.banner {
+  composes: banner from "../shared.module.css";
+}
+
+.bannerError {
+  composes: bannerError from "../shared.module.css";
+}
+
+.bannerSuccess {
+  composes: bannerSuccess from "../shared.module.css";
+}
+
+/* ---- Empty state ---- */
+
+.empty {
+  composes: empty from "../shared.module.css";
+}
+
+.emptyTitle {
+  composes: emptyTitle from "../shared.module.css";
+}
+
+.emptyBody {
+  composes: emptyBody from "../shared.module.css";
+}
+
+/* ---- Responsive: extras on top of the shared table card-stacking ---- */
+
+@media (max-width: 640px) {
+  .actionsCell {
+    text-align: left;
+  }
+
+  .actionsCell:empty {
+    display: none;
+  }
+
+  .paymentsCell {
+    min-width: 0;
+  }
+}

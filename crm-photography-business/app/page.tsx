@@ -23,6 +23,9 @@ export default function Home() {
       <p>
         <Link href="/convocation-events">Manage Convocation Events</Link>
       </p>
+      <p>
+        <Link href="/bookings">Manage Bookings</Link>
+      </p>
     </>
   );
 }

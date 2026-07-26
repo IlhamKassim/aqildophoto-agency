@@ -64,6 +64,14 @@ export function initializeSchema(db: Database.Database): void {
       final_payment TEXT,
       delivery_link TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS convocation_leads (
+      id TEXT PRIMARY KEY,
+      university TEXT NOT NULL,
+      date TEXT NOT NULL,
+      venue TEXT,
+      dismissed INTEGER NOT NULL DEFAULT 0
+    );
   `);
 }
 

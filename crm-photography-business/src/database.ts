@@ -72,6 +72,14 @@ export function initializeSchema(db: Database.Database): void {
       venue TEXT,
       dismissed INTEGER NOT NULL DEFAULT 0
     );
+
+    CREATE TABLE IF NOT EXISTS scraper_source_runs (
+      source_id TEXT PRIMARY KEY,
+      source_name TEXT NOT NULL,
+      status TEXT NOT NULL,
+      reason TEXT,
+      ran_at TEXT NOT NULL
+    );
   `);
 }
 

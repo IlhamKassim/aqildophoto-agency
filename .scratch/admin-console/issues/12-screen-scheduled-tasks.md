@@ -4,8 +4,8 @@
 
 **Blocked by:** 07 — Next.js scaffold + service wiring
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] A button triggers `expireStaleBookingRequests` (using the current time) and displays which Bookings were expired by that run
-- [ ] A button triggers `releaseEligiblePayouts` (using the current time) and displays which Bookings had their payout released by that run
-- [ ] Running either action with nothing eligible shows an empty result, not an error
+- [x] A button triggers `expireStaleBookingRequests` (using the current time) and displays which Bookings were expired by that run
+- [x] A button triggers `releaseEligiblePayouts` (using the current time) and displays which Bookings had their payout released by that run
+- [x] Running either action with nothing eligible shows an empty result, not an error

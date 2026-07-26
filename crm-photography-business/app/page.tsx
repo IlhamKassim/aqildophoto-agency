@@ -26,6 +26,9 @@ export default function Home() {
       <p>
         <Link href="/bookings">Manage Bookings</Link>
       </p>
+      <p>
+        <Link href="/scheduled-tasks">Run Scheduled Tasks</Link>
+      </p>
     </>
   );
 }

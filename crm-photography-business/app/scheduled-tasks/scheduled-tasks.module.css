@@ -1,0 +1,122 @@
+/*
+ * Scheduled Tasks screen. Shared primitives come from ../shared.module.css;
+ * only what is specific to this screen lives here.
+ */
+
+.page {
+  composes: page from "../shared.module.css";
+}
+
+.title {
+  composes: title from "../shared.module.css";
+}
+
+.subtitle {
+  composes: subtitle from "../shared.module.css";
+}
+
+.hint {
+  composes: hint from "../shared.module.css";
+}
+
+.srOnly {
+  composes: srOnly from "../shared.module.css";
+}
+
+.button {
+  composes: button from "../shared.module.css";
+}
+
+.primaryButton {
+  composes: primaryButton from "../shared.module.css";
+}
+
+.banner {
+  composes: banner from "../shared.module.css";
+}
+
+.bannerError {
+  composes: bannerError from "../shared.module.css";
+}
+
+.inlineLink {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* Two independent tasks, side by side while there is room. `1fr` columns keep
+   the cards the same width even when one has a long result list. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* ---- Last-run report ---- */
+
+.result {
+  width: 100%;
+  padding: var(--space-3);
+  background: var(--color-muted);
+  border-radius: var(--radius-sm);
+}
+
+.resultHeading {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.resultList {
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.resultItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.8125rem;
+}
+
+.resultStudent {
+  font-weight: 500;
+}
+
+.resultId {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-muted-foreground);
+}
+
+/* The detail takes the rest of the row, wrapping onto its own line when the
+   card is narrow rather than squeezing the Student identifier. */
+.resultDetail {
+  flex: 1 1 100%;
+  font-size: 0.75rem;
+  color: var(--color-muted-foreground);
+}

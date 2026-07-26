@@ -36,7 +36,8 @@
 
 .table th {
   text-align: left;
-  font-size: 0.6875rem;
+  /* 12px floor — 11px falls below the minimum legible size. */
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -196,7 +197,7 @@
   font-size: 0.875rem;
   color: var(--color-foreground);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-control);
   border-radius: var(--radius-sm);
 }
 
@@ -218,8 +219,10 @@
   font-weight: 500;
 }
 
+/* --color-destructive is only 3.95:1 on this tint; the darker rejected tone
+   reaches 5.30:1. Error text is the most important text on the screen. */
 .bannerError {
-  color: var(--color-destructive);
+  color: var(--color-rejected);
   background: var(--color-rejected-bg);
 }
 

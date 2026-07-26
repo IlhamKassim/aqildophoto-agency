@@ -18,7 +18,12 @@
   --color-foreground: #1e3a8a;
   --color-muted: #e9eef6;
   --color-muted-foreground: #475569;
+  /* Soft divider — decorative row separation only. */
   --color-border: #dbeafe;
+  /* Control boundary — 4.76:1 on white. Form fields must be identifiable by
+     their border (WCAG 1.4.11 non-text contrast); --color-border is 1.22:1 and
+     cannot carry that job. */
+  --color-border-control: #64748b;
   --color-destructive: #dc2626;
   --color-ring: #1e40af;
 

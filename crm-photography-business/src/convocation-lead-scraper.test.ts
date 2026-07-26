@@ -49,7 +49,8 @@ describe("ConvocationLeadScraperRunner", () => {
 
     await runner.runAll([source]);
 
-    expect(runner.getSourceRunStatuses()[0].status).toBe("ok");
+    const [status] = runner.getSourceRunStatuses();
+    expect(status?.status).toBe("ok");
   });
 
   it("records a rejecting source's status as failed, with a reason", async () => {

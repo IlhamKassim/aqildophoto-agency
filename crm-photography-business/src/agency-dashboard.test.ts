@@ -1,0 +1,59 @@
+import { describe, expect, it } from "vitest";
+import { AgencyDashboard } from "./agency-dashboard";
+import { BookingBoard } from "./booking-board";
+import { TimeSlotBoard } from "./time-slot-board";
+import { ConvocationEventRegistry } from "./convocation-event-registry";
+import { PackageCatalog } from "./package-catalog";
+import { PhotographerRegistry } from "./photographer-registry";
+import { openDatabase } from "./database";
+
+function approvalOf(approvedIds: string[]) {
+  return { isApproved: (photographerId: string) => approvedIds.includes(photographerId) };
+}
+
+function setUpBookingBoard() {
+  const convocationEvents = new ConvocationEventRegistry(openDatabase(":memory:"));
+  const event = convocationEvents.createConvocationEvent({
+    university: "Universiti Malaya",
+    faculty: "Faculty of Engineering",
+    date: new Date("2026-10-14"),
+    venue: "Dewan Tunku Canselor",
+  });
+  const timeSlotBoard = new TimeSlotBoard(approvalOf(["photographer-1"]), openDatabase(":memory:"));
+  timeSlotBoard.optIn("photographer-1", event.id);
+  const slot = timeSlotBoard.defineTimeSlot("photographer-1", event.id, {
+    start: new Date("2026-10-14T09:00:00"),
+    end: new Date("2026-10-14T09:30:00"),
+  });
+  const packages = new PackageCatalog(approvalOf(["photographer-1"]), openDatabase(":memory:"));
+  const pkg = packages.createPackage("photographer-1", {
+    name: "Basic",
+    price: 300,
+    description: "2hrs, 30 edited photos",
+  });
+  const bookings = new BookingBoard(
+    { timeSlots: timeSlotBoard, convocationEvents, packages },
+    openDatabase(":memory:"),
+  );
+  return { bookings, slot, eventId: event.id, packageId: pkg.id };
+}
+
+describe("AgencyDashboard", () => {
+  it("delegates listBookings to the BookingBoard", () => {
+    const { bookings, slot, eventId, packageId } = setUpBookingBoard();
+    const booking = bookings.requestBooking("student-1", slot.id, packageId, [], eventId);
+    const photographers = new PhotographerRegistry(openDatabase(":memory:"));
+    const dashboard = new AgencyDashboard({ bookings, photographers });
+
+    expect(dashboard.listBookings().map((b) => b.id)).toEqual([booking.id]);
+  });
+
+  it("delegates listPhotographers to the PhotographerRegistry", () => {
+    const { bookings } = setUpBookingBoard();
+    const photographers = new PhotographerRegistry(openDatabase(":memory:"));
+    const photographer = photographers.registerPhotographer({ name: "Aisyah Rahman" });
+    const dashboard = new AgencyDashboard({ bookings, photographers });
+
+    expect(dashboard.listPhotographers().map((p) => p.id)).toEqual([photographer.id]);
+  });
+});

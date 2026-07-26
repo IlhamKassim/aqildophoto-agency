@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getServices } from "../lib/services";
 import type { Photographer } from "../../src/photographer-registry";
 import { FeedbackProvider } from "./feedback";
@@ -67,7 +68,14 @@ export default function PhotographersPage() {
           <tbody>
             {photographers.map((photographer) => (
               <tr key={photographer.id}>
-                <td className={styles.nameCell}>{photographer.name}</td>
+                <td className={styles.nameCell}>
+                  <Link
+                    href={`/photographers/${photographer.id}`}
+                    className={styles.nameLink}
+                  >
+                    {photographer.name}
+                  </Link>
+                </td>
                 <td>
                   <StatusBadge status={photographer.status} />
                 </td>

@@ -1,0 +1,329 @@
+/*
+ * Photographer detail screen. Shares the token vocabulary defined in
+ * globals.css; nothing here introduces page-local colours or spacing.
+ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.breadcrumb {
+  font-size: 0.8125rem;
+  color: var(--color-muted-foreground);
+}
+
+.breadcrumb a {
+  color: var(--color-primary);
+}
+
+.pageHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* ---- Sections ---- */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.sectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.sectionMeta {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-muted-foreground);
+}
+
+/* ---- Cards (a Package, or a Convocation Event) ---- */
+
+.cardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.cardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.cardMeta {
+  font-size: 0.8125rem;
+  color: var(--color-muted-foreground);
+}
+
+.cardBody {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-muted-foreground);
+}
+
+.price {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.subheading {
+  margin: var(--space-2) 0 0;
+  /* 12px floor — 11px falls below the minimum legible size. */
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
+}
+
+/* ---- Add-ons and Time Slots ---- */
+
+.addOnList,
+.slotList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.addOnItem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.addOnItem:last-child {
+  border-bottom: none;
+}
+
+.slotItem {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.slotItem:last-child {
+  border-bottom: none;
+}
+
+/* ---- Forms ---- */
+
+.formBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(24rem, 100%);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+/* Horizontal variant for the short forms (add-on, opt-in, time slot) — wraps
+   to a column when there is not enough width. */
+.formRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Only the horizontal variant shares width between its fields. In the stacked
+   `.form` this must stay unset, or flex-grow stretches every field to fill the
+   column and opens huge gaps between the labels. */
+.formRow .field {
+  flex: 1 1 10rem;
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.input {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--color-foreground);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+}
+
+.textarea {
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--color-foreground);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+  resize: vertical;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-muted-foreground);
+}
+
+/* ---- Buttons ---- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  /* 44px min touch target per the accessibility rules. */
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-control);
+  background: var(--color-surface);
+  color: var(--color-foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background var(--transition), border-color var(--transition),
+    color var(--transition);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--color-muted);
+}
+
+.primaryButton {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #1b389b;
+}
+
+/* ---- Feedback ---- */
+
+.banner {
+  margin: 0;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  border-left: 3px solid currentColor;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* --color-destructive is only 3.95:1 on this tint; the darker rejected tone
+   reaches 5.30:1. Error text is the most important text on the screen. */
+.bannerError {
+  color: var(--color-rejected);
+  background: var(--color-rejected-bg);
+}
+
+.bannerSuccess {
+  color: var(--color-approved);
+  background: var(--color-approved-bg);
+}
+
+/* ---- Empty states ---- */
+
+.empty {
+  margin: 0;
+  padding: var(--space-6);
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-muted-foreground);
+  background: var(--color-background);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

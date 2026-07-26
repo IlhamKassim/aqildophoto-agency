@@ -62,6 +62,13 @@
   font-weight: 500;
 }
 
+/* The name is the row's way into the Photographer detail screen. Underlined
+   rather than colour-only so it reads as a link without relying on hue. */
+.nameLink {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
 .idCell {
   font-family: var(--font-mono);
   font-size: 0.8125rem;

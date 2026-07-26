@@ -73,6 +73,34 @@ describe("ConvocationLeadRegistry", () => {
     expect(registry.listUpcomingLeads(now)).toHaveLength(0);
   });
 
+  it("does not add a duplicate lead for the same university and date", () => {
+    const registry = setUp();
+    const first = registry.addLead({
+      university: "Universiti Malaya",
+      date: new Date("2026-10-14"),
+      venue: "Dewan Tunku Canselor",
+    });
+
+    const second = registry.addLead({
+      university: "Universiti Malaya",
+      date: new Date("2026-10-14"),
+      venue: "Dewan Tunku Canselor",
+    });
+
+    expect(second).toEqual(first);
+    expect(registry.listUpcomingLeads(new Date("2026-07-26"))).toHaveLength(1);
+  });
+
+  it("does not re-add a duplicate lead that was already dismissed", () => {
+    const registry = setUp();
+    const lead = registry.addLead({ university: "UM", date: new Date("2026-08-01") });
+    registry.dismissLead(lead.id);
+
+    registry.addLead({ university: "UM", date: new Date("2026-08-01") });
+
+    expect(registry.listUpcomingLeads(new Date("2026-07-26"))).toHaveLength(0);
+  });
+
   it("throws when dismissing an unknown lead id", () => {
     const registry = setUp();
 

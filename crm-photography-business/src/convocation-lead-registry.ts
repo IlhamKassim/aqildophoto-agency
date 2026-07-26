@@ -39,7 +39,16 @@ function sixMonthsFrom(date: Date): Date {
 export class ConvocationLeadRegistry {
   constructor(private readonly db: Database.Database) {}
 
+  /**
+   * Same (university, date) is the same Lead — repeated scrapes of an
+   * already-announced ceremony must not create duplicate rows, and must not
+   * un-dismiss a Lead the operator already dismissed.
+   */
   addLead(details: ConvocationLeadDetails): ConvocationLead {
+    const existing = this.findByUniversityAndDate(details.university, details.date);
+    if (existing) {
+      return existing;
+    }
     const lead: ConvocationLead = {
       id: crypto.randomUUID(),
       dismissed: false,
@@ -51,6 +60,15 @@ export class ConvocationLeadRegistry {
       )
       .run(lead.id, lead.university, lead.date.toISOString(), lead.venue ?? null);
     return lead;
+  }
+
+  private findByUniversityAndDate(university: string, date: Date): ConvocationLead | undefined {
+    const row = this.db
+      .prepare(
+        "SELECT id, university, date, venue, dismissed FROM convocation_leads WHERE university = ? AND date = ?",
+      )
+      .get(university, date.toISOString()) as ConvocationLeadRow | undefined;
+    return row ? toConvocationLead(row) : undefined;
   }
 
   listUpcomingLeads(now: Date = new Date()): ConvocationLead[] {

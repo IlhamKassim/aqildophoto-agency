@@ -110,6 +110,20 @@ describe("ConvocationLeadScraperRunner", () => {
     expect(statuses.find((status) => status.sourceId === "um")?.status).toBe("ok");
   });
 
+  it("does not create a duplicate Lead when the same candidate is scraped twice", async () => {
+    const { registry, runner } = setUp();
+    const source = fakeSource({
+      id: "um",
+      name: "Universiti Malaya",
+      fetchCandidates: async () => [{ university: "Universiti Malaya", date: new Date("2026-10-14") }],
+    });
+
+    await runner.runAll([source]);
+    await runner.runAll([source]);
+
+    expect(registry.listUpcomingLeads(new Date("2026-07-26"))).toHaveLength(1);
+  });
+
   it("survives re-instantiating against the same database connection", async () => {
     const db = openDatabase(":memory:");
     const registry = new ConvocationLeadRegistry(db);

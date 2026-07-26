@@ -73,6 +73,9 @@ export function initializeSchema(db: Database.Database): void {
       dismissed INTEGER NOT NULL DEFAULT 0
     );
 
+    CREATE UNIQUE INDEX IF NOT EXISTS convocation_leads_university_date
+      ON convocation_leads (university, date);
+
     CREATE TABLE IF NOT EXISTS scraper_source_runs (
       source_id TEXT PRIMARY KEY,
       source_name TEXT NOT NULL,

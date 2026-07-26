@@ -5,6 +5,8 @@ import { PackageCatalog } from "./package-catalog";
 import { TimeSlotBoard } from "./time-slot-board";
 import { BookingBoard } from "./booking-board";
 import { AgencyDashboard } from "./agency-dashboard";
+import { ConvocationLeadRegistry } from "./convocation-lead-registry";
+import { ConvocationLeadScraperRunner } from "./convocation-lead-scraper";
 
 export interface Services {
   photographers: PhotographerRegistry;
@@ -13,6 +15,8 @@ export interface Services {
   timeSlots: TimeSlotBoard;
   bookings: BookingBoard;
   dashboard: AgencyDashboard;
+  convocationLeads: ConvocationLeadRegistry;
+  scraperRunner: ConvocationLeadScraperRunner;
 }
 
 export function createServices(dbPath: string): Services {
@@ -23,5 +27,16 @@ export function createServices(dbPath: string): Services {
   const timeSlots = new TimeSlotBoard(photographers, db);
   const bookings = new BookingBoard({ timeSlots, convocationEvents, packages }, db);
   const dashboard = new AgencyDashboard({ bookings, photographers });
-  return { photographers, convocationEvents, packages, timeSlots, bookings, dashboard };
+  const convocationLeads = new ConvocationLeadRegistry(db);
+  const scraperRunner = new ConvocationLeadScraperRunner(db, convocationLeads);
+  return {
+    photographers,
+    convocationEvents,
+    packages,
+    timeSlots,
+    bookings,
+    dashboard,
+    convocationLeads,
+    scraperRunner,
+  };
 }

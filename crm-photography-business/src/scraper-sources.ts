@@ -1,5 +1,6 @@
 import type { ScraperSource } from "./scraper-source";
 import { createUniversitiMalayaSource } from "./um-convocation-source";
+import { createUnimasSource } from "./unimas-convocation-source";
 
 /**
  * Registered ScraperSources, one per implemented university. Adding a new
@@ -7,7 +8,10 @@ import { createUniversitiMalayaSource } from "./um-convocation-source";
  * um-convocation-source.ts for the shape — fetch + parse, tested against a
  * captured fixture), then add it to this array. No other file needs to change.
  */
-export const allScraperSources: ScraperSource[] = [createUniversitiMalayaSource()];
+export const allScraperSources: ScraperSource[] = [
+  createUniversitiMalayaSource(),
+  createUnimasSource(),
+];
 
 /**
  * Malaysia's public universities (IPTA) not yet implemented as a
@@ -23,7 +27,6 @@ export const UNIMPLEMENTED_IPTA_UNIVERSITIES = [
   "Universiti Teknologi Malaysia (UTM)",
   "Universiti Islam Antarabangsa Malaysia (UIAM/IIUM)",
   "Universiti Utara Malaysia (UUM)",
-  "Universiti Malaysia Sarawak (UNIMAS)",
   "Universiti Malaysia Sabah (UMS)",
   "Universiti Pendidikan Sultan Idris (UPSI)",
   "Universiti Teknologi MARA (UiTM)",

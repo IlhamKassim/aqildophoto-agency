@@ -65,6 +65,7 @@ export class PackageCatalog {
     if (!this.photographerApproval.isApproved(photographerId)) {
       throw new Error(`Photographer ${photographerId} is not approved`);
     }
+    this.assertPositivePrice(details.price, "Package");
     const pkg: Package = {
       id: crypto.randomUUID(),
       photographerId,
@@ -82,6 +83,7 @@ export class PackageCatalog {
     if (!this.getPackage(packageId)) {
       throw new Error(`No Package found with id ${packageId}`);
     }
+    this.assertPositivePrice(details.price, "Add-on");
     const addOn: AddOn = {
       id: crypto.randomUUID(),
       packageId,
@@ -115,6 +117,12 @@ export class PackageCatalog {
       return sum + addOn.price;
     }, 0);
     return pkg.price + addOnsTotal;
+  }
+
+  private assertPositivePrice(price: number, label: "Package" | "Add-on"): void {
+    if (price <= 0) {
+      throw new Error(`${label} price must be positive, got ${price}`);
+    }
   }
 
   private getPackage(packageId: string): Package | undefined {

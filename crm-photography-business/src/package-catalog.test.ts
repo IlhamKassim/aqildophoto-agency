@@ -40,6 +40,18 @@ describe("PackageCatalog", () => {
     ).toThrow();
   });
 
+  it("refuses to create a Package with a non-positive price", () => {
+    const catalog = setUp(["photographer-1"]);
+
+    expect(() =>
+      catalog.createPackage("photographer-1", {
+        name: "Basic",
+        price: 0,
+        description: "2hrs, 30 edited photos",
+      }),
+    ).toThrow();
+  });
+
   it("lets a Photographer add an Add-on to an existing Package", () => {
     const catalog = setUp(["photographer-1"]);
     const pkg = catalog.createPackage("photographer-1", {
@@ -63,6 +75,17 @@ describe("PackageCatalog", () => {
     expect(() =>
       catalog.addAddOn("unknown-package-id", { name: "Extra hour", price: 100 }),
     ).toThrow();
+  });
+
+  it("refuses to add an Add-on with a non-positive price", () => {
+    const catalog = setUp(["photographer-1"]);
+    const pkg = catalog.createPackage("photographer-1", {
+      name: "Basic",
+      price: 300,
+      description: "2hrs, 30 edited photos",
+    });
+
+    expect(() => catalog.addAddOn(pkg.id, { name: "Extra hour", price: -10 })).toThrow();
   });
 
   it("lists a Photographer's Packages together with their Add-ons", () => {

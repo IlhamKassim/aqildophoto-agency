@@ -27,14 +27,19 @@ function run(photographerId: string, fn: () => string): ActionState {
   }
 }
 
-/** Prices are RM amounts stored as REAL. Reject anything not a positive number. */
+/**
+ * Prices are RM amounts stored as REAL. Only structural parsing happens here
+ * — is this even a number — since the domain method's signature already
+ * requires a `number`. Whether that number is a valid price (positive) is a
+ * business rule `PackageCatalog` enforces itself.
+ */
 function parsePrice(raw: string, label: string): number | string {
   if (!raw) {
     return `${label} is required.`;
   }
   const price = Number(raw);
-  if (!Number.isFinite(price) || price <= 0) {
-    return `${label} must be a positive amount.`;
+  if (!Number.isFinite(price)) {
+    return `${label} must be a number.`;
   }
   return price;
 }
@@ -134,9 +139,7 @@ export async function defineTimeSlotAction(
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     return { error: "Start and end must be valid times." };
   }
-  if (end <= start) {
-    return { error: "The end time must be after the start time." };
-  }
+  // Ordering (end after start) is a business rule TimeSlotBoard enforces.
 
   return run(photographerId, () => {
     getServices().timeSlots.defineTimeSlot(photographerId, convocationEventId, {

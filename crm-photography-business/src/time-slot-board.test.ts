@@ -50,6 +50,18 @@ describe("TimeSlotBoard", () => {
     ).toThrow();
   });
 
+  it("refuses to define a Time Slot whose end is not after its start", () => {
+    const board = setUp(["photographer-1"]);
+    board.optIn("photographer-1", "event-1");
+
+    expect(() =>
+      board.defineTimeSlot("photographer-1", "event-1", {
+        start: new Date("2026-10-14T09:30:00"),
+        end: new Date("2026-10-14T09:00:00"),
+      }),
+    ).toThrow();
+  });
+
   it("lists the Photographer ids opted in to a Convocation Event", () => {
     const board = setUp(["photographer-1", "photographer-2"]);
     board.optIn("photographer-1", "event-1");

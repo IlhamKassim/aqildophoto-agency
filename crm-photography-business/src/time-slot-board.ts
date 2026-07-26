@@ -60,6 +60,11 @@ export class TimeSlotBoard {
         `Photographer ${photographerId} has not opted in to Convocation Event ${convocationEventId}`,
       );
     }
+    if (window.end <= window.start) {
+      throw new Error(
+        `Time Slot end (${window.end.toISOString()}) must be after start (${window.start.toISOString()})`,
+      );
+    }
     const slot: TimeSlot = {
       id: crypto.randomUUID(),
       photographerId,

@@ -18,10 +18,10 @@ _Avoid_: Client, customer (use Student for clarity against Photographer)
 The business itself. Recruits and vets Photographers, facilitates the Student-Photographer Booking, and takes a commission/percentage of each Booking. Not a manual matchmaker in the current model.
 
 **Package**:
-A fixed-price offering listed by a Photographer (e.g. "Basic – RM300 – 2hrs, 30 edited photos"). Price is known upfront, since it determines both the Commitment Payment and Final Payment amounts.
+A fixed-price offering listed by a Photographer (e.g. "Basic – RM300 – 2hrs, 30 edited photos"). Price is known upfront, since it determines both the Commitment Payment and Final Payment amounts. Price is always a positive amount — a free or negatively-priced Package is not a valid offering.
 
 **Add-on**:
-An optional, fixed-price extra a Student selects alongside a Package at Booking time (e.g. extra hour, extra outfit change, rush editing). Combines with the Package price to form the total charged.
+An optional, fixed-price extra a Student selects alongside a Package at Booking time (e.g. extra hour, extra outfit change, rush editing). Combines with the Package price to form the total charged. Price is always a positive amount, same as a Package.
 
 **Convocation Event**:
 A specific graduation ceremony session (e.g. "UM Faculty of Engineering — Convocation Session 3 — 14 Oct 2026"), maintained as a first-class entity rather than free-text on a Booking. Students select which Convocation Event they're booking for. Maintained via manual admin entry by Agency staff, not imported from an external source.
@@ -30,7 +30,7 @@ A specific graduation ceremony session (e.g. "UM Faculty of Engineering — Conv
 A Photographer must explicitly opt in to a specific Convocation Event to be listed as bookable for it — general/passive calendar availability is not enough. No explicit capacity number in v1; availability is naturally limited by holding at most one Booking per time slot.
 
 **Time Slot**:
-A discrete, bookable window (e.g. 9:00–9:30) that a Photographer defines within a Convocation Event they've opted into. A Student books one open Time Slot; once booked, it's no longer available to other Students. Prevents double-booking by construction.
+A discrete, bookable window (e.g. 9:00–9:30) that a Photographer defines within a Convocation Event they've opted into. A Student books one open Time Slot; once booked, it's no longer available to other Students. Prevents double-booking by construction. The end always comes after the start — no minimum duration is enforced beyond that.
 
 **Booking**:
 A request-to-book agreement between a Student and a Photographer for a specific Time Slot within a Convocation Event, covering a chosen Package and any Add-ons. Created when a Student requests a Time Slot; only becomes active once the Photographer accepts.

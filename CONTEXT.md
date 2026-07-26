@@ -26,6 +26,10 @@ An optional, fixed-price extra a Student selects alongside a Package at Booking 
 **Convocation Event**:
 A specific graduation ceremony session (e.g. "UM Faculty of Engineering — Convocation Session 3 — 14 Oct 2026"), maintained as a first-class entity rather than free-text on a Booking. Students select which Convocation Event they're booking for. Maintained via manual admin entry by Agency staff, not imported from an external source.
 
+**Convocation Lead**:
+An externally-sourced, unconfirmed graduation ceremony scraped from a Malaysian university's own website — tracked before the Agency has committed to pursuing it. Coarser than a Convocation Event: carries university and date (faculty is not required, since it's rarely published this early), with venue if available. Purely informational for the Agency operator's own sourcing/planning; there is no conversion action linking a Convocation Lead to the Convocation Event an operator may later create by hand if they decide to pursue it. An operator can dismiss a Lead they're not pursuing, so it stops appearing without deleting the record.
+_Avoid_: Convocation Event (a Lead is not onboarded/committed; an Event is)
+
 **Photographer availability**:
 A Photographer must explicitly opt in to a specific Convocation Event to be listed as bookable for it — general/passive calendar availability is not enough. No explicit capacity number in v1; availability is naturally limited by holding at most one Booking per time slot.
 

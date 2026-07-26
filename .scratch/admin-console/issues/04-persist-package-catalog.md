@@ -4,9 +4,9 @@
 
 **Blocked by:** 01 — SQLite setup
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `PackageCatalog` reads/writes Package and Add-on records through SQLite instead of in-memory `Map`s
-- [ ] All existing `PackageCatalog` tests pass unchanged (aside from test setup now pointing at a `:memory:` SQLite database)
-- [ ] A new test confirms data survives re-instantiating `PackageCatalog` against the same database file/connection
-- [ ] No change to `PackageCatalog`'s public method signatures or the `Package`/`AddOn`/`PackageWithAddOns` types
+- [x] `PackageCatalog` reads/writes Package and Add-on records through SQLite instead of in-memory `Map`s
+- [x] All existing `PackageCatalog` tests pass unchanged (aside from test setup now pointing at a `:memory:` SQLite database)
+- [x] A new test confirms data survives re-instantiating `PackageCatalog` against the same database file/connection
+- [x] No change to `PackageCatalog`'s public method signatures or the `Package`/`AddOn`/`PackageWithAddOns` types

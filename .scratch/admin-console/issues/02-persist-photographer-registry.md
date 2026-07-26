@@ -4,9 +4,9 @@
 
 **Blocked by:** 01 — SQLite setup
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `PhotographerRegistry` reads/writes Photographer records through SQLite instead of an in-memory `Map`
-- [ ] All 8 existing `PhotographerRegistry` tests pass unchanged (aside from test setup now pointing at a `:memory:` SQLite database)
-- [ ] A new test confirms data survives re-instantiating `PhotographerRegistry` against the same database file/connection
-- [ ] No change to `PhotographerRegistry`'s public method signatures or the `Photographer`/`PhotographerStatus` types
+- [x] `PhotographerRegistry` reads/writes Photographer records through SQLite instead of an in-memory `Map`
+- [x] All 8 existing `PhotographerRegistry` tests pass unchanged (aside from test setup now pointing at a `:memory:` SQLite database)
+- [x] A new test confirms data survives re-instantiating `PhotographerRegistry` against the same database file/connection
+- [x] No change to `PhotographerRegistry`'s public method signatures or the `Photographer`/`PhotographerStatus` types

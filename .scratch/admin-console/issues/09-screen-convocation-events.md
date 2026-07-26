@@ -4,7 +4,7 @@
 
 **Blocked by:** 07 — Next.js scaffold + service wiring
 
-**Status:** ready-for-human
+**Status:** done
 
 - [x] The screen lists upcoming Convocation Events (university, faculty, date, venue)
 - [x] A form creates a new Convocation Event with those fields

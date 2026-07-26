@@ -4,7 +4,7 @@
 
 **Blocked by:** 07 — Next.js scaffold + service wiring
 
-**Status:** ready-for-human
+**Status:** done
 
 - [x] The screen shows a single Photographer's existing Packages, each with its Add-ons
 - [x] A form creates a new Package (name, price, description) for this Photographer

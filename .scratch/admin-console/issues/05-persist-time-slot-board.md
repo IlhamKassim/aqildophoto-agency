@@ -4,9 +4,9 @@
 
 **Blocked by:** 01 — SQLite setup
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `TimeSlotBoard` reads/writes opt-in and Time Slot records through SQLite instead of in-memory `Map`s/arrays
-- [ ] All existing `TimeSlotBoard` tests pass unchanged (aside from test setup now pointing at a `:memory:` SQLite database)
-- [ ] A new test confirms data survives re-instantiating `TimeSlotBoard` against the same database file/connection
-- [ ] No change to `TimeSlotBoard`'s public method signatures or the `TimeSlot`/`TimeSlotWindow` types
+- [x] `TimeSlotBoard` reads/writes opt-in and Time Slot records through SQLite instead of in-memory `Map`s/arrays
+- [x] All existing `TimeSlotBoard` tests pass unchanged (aside from test setup now pointing at a `:memory:` SQLite database)
+- [x] A new test confirms data survives re-instantiating `TimeSlotBoard` against the same database file/connection
+- [x] No change to `TimeSlotBoard`'s public method signatures or the `TimeSlot`/`TimeSlotWindow` types

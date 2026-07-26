@@ -4,9 +4,9 @@
 
 **Blocked by:** 02 — Persist PhotographerRegistry, 03 — Persist ConvocationEventRegistry, 04 — Persist PackageCatalog, 05 — Persist TimeSlotBoard, 06 — Persist BookingBoard
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `npm run dev` boots a Next.js app reachable at localhost with no visible screens yet beyond a placeholder
-- [ ] A single shared SQLite database file is opened once at server startup
-- [ ] Singleton instances of `PhotographerRegistry`, `ConvocationEventRegistry`, `PackageCatalog`, `TimeSlotBoard`, `BookingBoard`, and `AgencyDashboard` are created against that shared connection and are reachable from Server Actions/route handlers
-- [ ] No authentication, login, or session handling exists anywhere in the app
+- [x] `npm run dev` boots a Next.js app reachable at localhost with no visible screens yet beyond a placeholder
+- [x] A single shared SQLite database file is opened once at server startup
+- [x] Singleton instances of `PhotographerRegistry`, `ConvocationEventRegistry`, `PackageCatalog`, `TimeSlotBoard`, `BookingBoard`, and `AgencyDashboard` are created against that shared connection and are reachable from Server Actions/route handlers
+- [x] No authentication, login, or session handling exists anywhere in the app

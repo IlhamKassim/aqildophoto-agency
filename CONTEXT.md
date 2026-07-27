@@ -30,6 +30,13 @@ A specific graduation ceremony session (e.g. "UM Faculty of Engineering — Conv
 An externally-sourced, unconfirmed graduation ceremony scraped from a Malaysian university's own website — tracked before the Agency has committed to pursuing it. Coarser than a Convocation Event: carries university and date (faculty is not required, since it's rarely published this early), with venue if available. Purely informational for the Agency operator's own sourcing/planning; there is no conversion action linking a Convocation Lead to the Convocation Event an operator may later create by hand if they decide to pursue it. An operator can dismiss a Lead they're not pursuing, so it stops appearing without deleting the record.
 _Avoid_: Convocation Event (a Lead is not onboarded/committed; an Event is)
 
+**IPTA** (Institusi Pendidikan Tinggi Awam):
+Malaysia's public universities — government-funded, degree-granting institutions (e.g. Universiti Malaya, Universiti Malaysia Sarawak). The Convocation Lead scraper's initial sources are drawn from this list; see `scraper-sources.ts`'s `UNIMPLEMENTED_IPTA_UNIVERSITIES` for the ones not yet implemented.
+
+**IPTS** (Institusi Pendidikan Tinggi Swasta):
+Malaysia's private universities and university colleges — degree-granting, privately funded institutions with their own convocation ceremonies (e.g. Taylor's, UCSI, INTI). Scoped to universities and university colleges only — a private college or campus without full university-college status is not an IPTS for Convocation Lead sourcing purposes, since it wouldn't hold its own convocation ceremony. One IPTS source is implemented so far (Universiti Teknologi Petronas — see `utp-convocation-source.ts`); see `scraper-sources.ts`'s `UNCONFIRMED_IPTS_UNIVERSITIES` for the (larger) list of candidates checked and found not currently viable.
+_Avoid_: conflating with IPTA (public) — the two are sourced and tracked as separate candidate lists
+
 **Photographer availability**:
 A Photographer must explicitly opt in to a specific Convocation Event to be listed as bookable for it — general/passive calendar availability is not enough. No explicit capacity number in v1; availability is naturally limited by holding at most one Booking per time slot.
 
